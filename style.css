@@ -593,3 +593,34 @@ figcaption b {
   .sheet-nav { grid-template-columns: 1fr; }
   .sheet-nav .nav-next { text-align: left; border-left: none; border-top: 1px solid var(--rule); padding-left: 4px; }
 }
+
+/* ============================================================
+   PORTRAIT FIGURES — phone screenshots
+   ============================================================ */
+
+.fig-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+@media (max-width: 780px) {
+  .fig-grid-3 { grid-template-columns: 1fr; }
+}
+
+.fig-portrait img {
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+  border: none;
+  background: transparent;
+}
+
+.fig-portrait figcaption { text-align: center; }
+
+@media (max-width: 780px) {
+  .fig-portrait img { max-width: 280px; }
+}
+
+/* portrait placeholder, used before screenshots are added */
+.img-slot-portrait {
+  aspect-ratio: 9 / 19.5;
+  max-width: 320px;
+  margin: 0 auto;
+}

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LiDAR Wound Scanning App — Brady Golomb</title>
-<meta name="description" content="An iPhone app that measures and classifies wounds using LiDAR depth sensing and a clinical scoring matrix. Built at One Health Partners, 2026.">
+<title>Delta Wound App — Brady Golomb</title>
+<meta name="description" content="An iPhone app that measures wounds with LiDAR and drafts clinical documentation. Co-built at Blue Swan BioMed, summer 2026.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -29,28 +29,28 @@
     <div class="sheet-eyebrow">
       <p class="label">Sheet 01 of 06</p>
       <span class="rule-fill"></span>
-      <p class="label">One Health Partners · 2026</p>
+      <p class="label">Blue Swan BioMed · 2026</p>
     </div>
-    <h1 class="h-display sheet-title">LiDAR Wound Scanning App</h1>
-    <p class="sheet-standfirst">An iPhone app that measures and classifies wounds using the phone's depth sensor, scored against a clinical matrix built from fifty hours of watching physicians work.</p>
+    <h1 class="h-display sheet-title">Delta Wound App</h1>
+    <p class="sheet-standfirst">Precision wound measurement and documentation, running on the iPhone a clinician already has in their pocket.</p>
   </div>
   <div class="wrap">
     <div class="titleblock">
       <div class="tb-cell">
         <p class="label">Role</p>
-        <p class="tb-val">Product Development Intern</p>
+        <p class="tb-val">Product Development Intern — co-built with Lorenzo Ruma</p>
       </div>
       <div class="tb-cell">
         <p class="label">Organization</p>
-        <p class="tb-val">One Health Partners<br>Naperville, IL</p>
+        <p class="tb-val">Blue Swan BioMed<br>One Health Partners</p>
       </div>
       <div class="tb-cell">
         <p class="label">Built with</p>
-        <p class="tb-val">iOS · LiDAR depth capture · AI image analysis</p>
+        <p class="tb-val">iOS · LiDAR depth capture · On-device image analysis</p>
       </div>
       <div class="tb-cell">
-        <p class="label">Duration</p>
-        <p class="tb-val">Summer 2026</p>
+        <p class="label">Status</p>
+        <p class="tb-val">In beta with clinician testers</p>
       </div>
     </div>
   </div>
@@ -61,52 +61,60 @@
 
     <div class="sheet-section prose">
       <h2>The problem</h2>
-      <p>Wound assessment is one of the least standardized things a clinician does. Two providers looking at the same wound can record different measurements, different depth estimates, and different judgments about how it's healing — and because the record is usually a photograph plus a written note, there's no reliable way to compare a wound to itself two weeks later. For a healthcare group operating across many acquired practices, that variation compounds: the same patient can get materially different care depending on which office they walk into.</p>
-      <p>I spent the first weeks of the internship shadowing physicians rather than building anything, logging more than fifty hours across clinical settings. Watching the assessment happen repeatedly is what made the gap obvious. The measurement step was fast, informal, and almost entirely dependent on the individual clinician's experience.</p>
-    </div>
-
-    <!-- IMAGE: replace this block with →  <img src="images/wound-app-01.jpg" alt="Wound scanning app running on an iPhone"> -->
-    <figure>
-      <div class="img-slot img-slot-wide"><span>images/wound-app-01.jpg</span></div>
-      <figcaption><b>Fig. 01</b> — The scanning interface capturing a wound with the iPhone's depth sensor.</figcaption>
-    </figure>
-
-    <div class="sheet-section prose">
-      <h2>The approach</h2>
-      <p>Recent iPhones carry a LiDAR sensor that most people only ever use for portrait-mode background blur. It produces a real depth map, which means a phone that's already in every clinician's pocket can capture wound geometry — area, perimeter, and depth — without any additional hardware, calibration markers, or cost.</p>
-      <p>I built the app around that sensor. It captures the wound, extracts the measurements from the depth data, and runs image analysis to classify what it's looking at. The output isn't a raw number dump; it's scored against a wound care matrix I wrote, which encodes the assessment criteria I'd watched physicians apply informally into something the software can evaluate consistently every time.</p>
-      <p>Writing the matrix was the part that depended most on the shadowing. It had to reflect how clinicians actually reason about a wound rather than how a textbook describes one, or providers would ignore the output and go back to eyeballing it.</p>
-    </div>
-
-    <!-- IMAGE: replace each block with →  <img src="images/wound-app-02.jpg" alt="..."> -->
-    <div class="fig-grid">
-      <figure>
-        <div class="img-slot"><span>images/wound-app-02.jpg</span></div>
-        <figcaption><b>Fig. 02</b> — Depth capture output.</figcaption>
-      </figure>
-      <figure>
-        <div class="img-slot"><span>images/wound-app-03.jpg</span></div>
-        <figcaption><b>Fig. 03</b> — Assessment scored against the wound care matrix.</figcaption>
-      </figure>
+      <p>Wound documentation has barely changed in decades. Measurement is done with a paper ruler and a cotton swab, which means two clinicians assessing the same wound can record meaningfully different numbers — and multiplying length by width to estimate area systematically overstates it, badly, on any wound that isn't a neat oval.</p>
+      <p>That matters more than it first appears. Wound care is a longitudinal problem: the clinical question is almost never "how big is this today," it's "is this healing." If the baseline measurement isn't trustworthy, every follow-up comparison inherits the error, and a wound that's deteriorating can look stable on paper.</p>
+      <p>The record is fragmented on top of that. Photos live on one device, measurements on paper, notes somewhere else, and the write-up happens by hand afterward — time taken directly out of patient care.</p>
     </div>
 
     <div class="sheet-section prose">
-      <h2>The outcome</h2>
-      <p>The result is a wound assessment that produces the same answer regardless of who is holding the phone, and a record that can be compared against itself over the course of treatment. Because it runs on standard hardware, rolling it out across acquired practices costs nothing beyond the software itself.</p>
-      <p>The broader lesson was about sequencing. I could have started building on day one and shipped something faster. The fifty hours of shadowing are what made the tool usable, and they're the reason the matrix reflects clinical judgment instead of my assumptions about it.</p>
+      <h2>Why LiDAR</h2>
+      <p>Every iPhone Pro since the 12 Pro carries a LiDAR sensor. It emits a pulse of laser light, times how long the reflection takes to return, and — because the speed of light is known — converts that interval into a precise distance. Repeated thousands of times across a surface, it produces a depth map.</p>
+      <p>That's the piece conventional wound photography can't do. A camera gives you a flat image; depth sensing gives you the third dimension, which is what turns a photograph into a measurement. And because the hardware already exists in a device clinicians carry, adopting it costs nothing — no dongle, no calibration sticker, no proprietary scanner.</p>
+    </div>
+
+    <div class="sheet-section prose">
+      <h2>How it works</h2>
+      <p>The app covers the full assessment workflow. A clinician adds a patient, places the wound on a body diagram, and captures it. The capture step is guided — the app checks distance, angle, and framing before it will take the shot, so this week's measurement is genuinely comparable to last week's rather than being taken from a different position under different light.</p>
+      <p>From a single capture it computes length, width, depth, and surface area without anything touching the wound bed. It then analyzes the wound bed itself, classifying tissue types — granulation, slough, eschar, and epithelialization — from on-device pixel analysis inside the traced outline, and reporting the estimated share of each.</p>
+      <p>Those measurements and the tissue assessment are synthesized into a draft SOAP note. The clinician reviews, edits, and signs it. Nothing enters the record automatically, and the app is explicit throughout that its output is for clinician verification — the drafting is automated, the judgment is not.</p>
+    </div>
+
+    <div class="fig-grid fig-grid-3">
+      <!-- IMAGE: replace this block with →  <img src="images/wound-app-01.jpg" alt="Guided capture screen with the wound centered in a crosshair"> -->
+      <figure class="fig-portrait">
+        <div class="img-slot img-slot-portrait"><span>images/wound-app-01.jpg</span></div>
+        <figcaption><b>Fig. 01</b> — Guided capture. The app confirms distance and angle before allowing the shot.</figcaption>
+      </figure>
+      <!-- IMAGE: replace this block with →  <img src="images/wound-app-02.jpg" alt="Analysis results showing wound mask and measurements"> -->
+      <figure class="fig-portrait">
+        <div class="img-slot img-slot-portrait"><span>images/wound-app-02.jpg</span></div>
+        <figcaption><b>Fig. 02</b> — Length, width, depth, and area from one LiDAR capture, with the traced wound mask.</figcaption>
+      </figure>
+      <!-- IMAGE: replace this block with →  <img src="images/wound-app-03.jpg" alt="Wound bed composition breakdown and draft SOAP note"> -->
+      <figure class="fig-portrait">
+        <div class="img-slot img-slot-portrait"><span>images/wound-app-03.jpg</span></div>
+        <figcaption><b>Fig. 03</b> — Tissue composition and the draft SOAP note, ready for clinician review.</figcaption>
+      </figure>
+    </div>
+
+    <div class="sheet-section prose">
+      <h2>What I brought to it</h2>
+      <p>I co-built the app with Lorenzo Ruma over the summer. Before either of us designed anything, I spent more than fifty hours shadowing five physicians across five specialties — watching how wound assessment actually happens rather than how it's described in a protocol.</p>
+      <p>That's what the clinical logic came out of. Alongside the app I built a wound care matrix: a structured reference for matching dressings to wounds, ordered by drainage first and depth second, with the tissue states and contraindications that determine when a given dressing is appropriate. Encoding that reasoning is what lets software evaluate a wound bed consistently instead of just describing it.</p>
+      <p>The shadowing shaped smaller decisions too. Guided capture exists because I watched how variably photographs get taken in a real exam room, and the review-and-sign requirement exists because no physician I observed was going to accept a note they hadn't read.</p>
 
       <div class="outcomes">
         <div class="outcome">
-          <p class="outcome-fig">50+</p>
-          <p class="outcome-txt">Hours shadowing physicians before development began</p>
+          <p class="outcome-fig">4</p>
+          <p class="outcome-txt">Measurements — length, width, depth, area — from a single capture</p>
         </div>
         <div class="outcome">
           <p class="outcome-fig">0</p>
-          <p class="outcome-txt">Additional hardware required — runs on a standard iPhone</p>
+          <p class="outcome-txt">Extra hardware. Runs on an iPhone the clinic already owns</p>
         </div>
         <div class="outcome">
-          <p class="outcome-fig">3D</p>
-          <p class="outcome-txt">Depth, area, and perimeter captured in a single scan</p>
+          <p class="outcome-fig">50+</p>
+          <p class="outcome-txt">Hours shadowing 5 physicians across 5 specialties first</p>
         </div>
       </div>
     </div>
