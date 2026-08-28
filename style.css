@@ -605,7 +605,7 @@ figcaption b {
 }
 
 .fig-portrait img {
-  max-width: 240px;
+  max-width: 150px;
   margin-left: auto;
   margin-right: auto;
   border: none;
@@ -614,13 +614,13 @@ figcaption b {
 
 .fig-portrait figcaption {
   text-align: center;
-  max-width: 240px;
+  max-width: 150px;
   margin-left: auto;
   margin-right: auto;
 }
 
 @media (max-width: 780px) {
-  .fig-portrait img { max-width: 220px; }
+  .fig-portrait img { max-width: 150px; }
 }
 
 /* portrait placeholder, used before screenshots are added */
