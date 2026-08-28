@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EMR with Patient Audio Briefings — Brady Golomb</title>
+<meta name="description" content="An electronic medical records system that converts physician SOAP notes into plain-language audio briefings for patients. Built at One Health Partners, 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <a class="masthead-name" href="index.html">Brady Golomb</a>
+    <nav class="masthead-nav">
+      <a href="index.html#work">Work</a>
+      <a href="index.html#about">About</a>
+      <a href="resume.pdf">Résumé</a>
+      <a href="https://www.linkedin.com/in/bradygolomb">LinkedIn</a>
+    </nav>
+  </div>
+</header>
+
+<section class="sheet-head">
+  <div class="wrap">
+    <div class="sheet-eyebrow">
+      <p class="label">Sheet 02 of 06</p>
+      <span class="rule-fill"></span>
+      <p class="label">One Health Partners · 2026</p>
+    </div>
+    <h1 class="h-display sheet-title">EMR with Patient Audio Briefings</h1>
+    <p class="sheet-standfirst">A records system that turns a physician's clinical notes into a plain-language podcast the patient can listen to on the drive home.</p>
+  </div>
+  <div class="wrap">
+    <div class="titleblock">
+      <div class="tb-cell">
+        <p class="label">Role</p>
+        <p class="tb-val">Product Development Intern</p>
+      </div>
+      <div class="tb-cell">
+        <p class="label">Organization</p>
+        <p class="tb-val">One Health Partners<br>Naperville, IL</p>
+      </div>
+      <div class="tb-cell">
+        <p class="label">Built with</p>
+        <p class="tb-val">EMR architecture · AI summarization · Text-to-speech</p>
+      </div>
+      <div class="tb-cell">
+        <p class="label">Duration</p>
+        <p class="tb-val">Summer 2026</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sheet-body">
+  <div class="wrap">
+
+    <div class="sheet-section prose">
+      <h2>The problem</h2>
+      <p>Patients forget most of what they're told in an appointment. They're anxious, the visit is short, and the information arrives in clinical vocabulary. What they leave with is usually a printed after-visit summary written in the same register as the chart it came from — which is to say, written for another clinician.</p>
+      <p>Meanwhile the actual account of what happened already exists, in detail, in the physician's SOAP notes and the clinical staff's patient notes. The information isn't missing. It's just stored in a form the patient can't use.</p>
+    </div>
+
+    <!-- IMAGE: replace this block with →  <img src="images/emr-01.jpg" alt="EMR interface"> -->
+    <figure>
+      <div class="img-slot img-slot-wide"><span>images/emr-01.jpg</span></div>
+      <figcaption><b>Fig. 01</b> — The records interface where clinical notes are entered.</figcaption>
+    </figure>
+
+    <div class="sheet-section prose">
+      <h2>The approach</h2>
+      <p>I built a new EMR system and added a layer on top of it that reads the physician's SOAP notes alongside the clinical staff's patient notes and generates an audio briefing from them. The patient gets a short podcast explaining, in ordinary language, what was found, what was done about it, and what they need to do during recovery.</p>
+      <p>Audio was a deliberate choice rather than a novelty. A printed summary competes for attention with everything else a patient is carrying out of an appointment, and reading it requires sitting down with it. A recording can be played in the car, replayed a week later when the instructions have blurred, or handed to the family member who's actually managing the recovery.</p>
+      <p>The design constraint that mattered most was tone. The output had to translate the clinical record without editorializing on it or inventing reassurance the notes didn't support — the goal was to make the existing record legible, not to generate new medical content.</p>
+    </div>
+
+    <!-- IMAGE: replace each block with →  <img src="images/emr-02.jpg" alt="..."> -->
+    <div class="fig-grid">
+      <figure>
+        <div class="img-slot"><span>images/emr-02.jpg</span></div>
+        <figcaption><b>Fig. 02</b> — SOAP note input.</figcaption>
+      </figure>
+      <figure>
+        <div class="img-slot"><span>images/emr-03.jpg</span></div>
+        <figcaption><b>Fig. 03</b> — Generated patient briefing, ready to play.</figcaption>
+      </figure>
+    </div>
+
+    <div class="sheet-section prose">
+      <h2>The outcome</h2>
+      <p>The system produces a patient-facing explanation of care and post-discharge treatment automatically, from notes clinicians were already writing. There's no additional documentation burden — the physician's workflow doesn't change, and the translation happens downstream.</p>
+      <p>What I took from the project is that a lot of healthcare's communication problem isn't a data problem. The information a patient needs usually already exists somewhere in their record. The work is moving it across the gap between how clinicians write and how patients listen.</p>
+
+      <div class="outcomes">
+        <div class="outcome">
+          <p class="outcome-fig">0</p>
+          <p class="outcome-txt">Extra documentation required from physicians</p>
+        </div>
+        <div class="outcome">
+          <p class="outcome-fig">2</p>
+          <p class="outcome-txt">Note sources combined — physician SOAP and clinical staff notes</p>
+        </div>
+        <div class="outcome">
+          <p class="outcome-fig">Audio</p>
+          <p class="outcome-txt">Replayable, shareable with family, usable while driving</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="wrap">
+    <nav class="sheet-nav">
+      <a class="nav-prev" href="wound-care-app.html">
+        <p class="label">← Sheet 01</p>
+        <div class="nav-ttl">LiDAR Wound Scanning App</div>
+      </a>
+      <a class="nav-next" href="bike-adapter.html">
+        <p class="label">Sheet 03 →</p>
+        <div class="nav-ttl">Prosthetic Bike Adapter</div>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <p class="label">Brady Golomb — Philadelphia, PA</p>
+    <div class="foot-links">
+      <a href="mailto:bradygolomb06@gmail.com">Email</a>
+      <a href="https://www.linkedin.com/in/bradygolomb">LinkedIn</a>
+      <a href="resume.pdf">Résumé</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

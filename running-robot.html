@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Running Form Robot — Brady Golomb</title>
+<meta name="description" content="A camera rover built from a salvaged RC car that autonomously follows a runner and reports stride rate in real time.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <a class="masthead-name" href="index.html">Brady Golomb</a>
+    <nav class="masthead-nav">
+      <a href="index.html#work">Work</a>
+      <a href="index.html#about">About</a>
+      <a href="resume.pdf">Résumé</a>
+      <a href="https://www.linkedin.com/in/bradygolomb">LinkedIn</a>
+    </nav>
+  </div>
+</header>
+
+<section class="sheet-head">
+  <div class="wrap">
+    <div class="sheet-eyebrow">
+      <p class="label">Sheet 05 of 06</p>
+      <span class="rule-fill"></span>
+      <p class="label">Personal project · 2024</p>
+    </div>
+    <h1 class="h-display sheet-title">Running Form Robot</h1>
+    <p class="sheet-standfirst">A camera rover that chases a runner down the road and tells them their stride rate while they're still running.</p>
+  </div>
+  <div class="wrap">
+    <div class="titleblock">
+      <div class="tb-cell">
+        <p class="label">Role</p>
+        <p class="tb-val">Sole designer and builder</p>
+      </div>
+      <div class="tb-cell">
+        <p class="label">Origin</p>
+        <p class="tb-val">Personal project</p>
+      </div>
+      <div class="tb-cell">
+        <p class="label">Built with</p>
+        <p class="tb-val">Salvaged RC platform · GoPro · AI motion capture</p>
+      </div>
+      <div class="tb-cell">
+        <p class="label">Output</p>
+        <p class="tb-val">Real-time stride rate (SPM)</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sheet-body">
+  <div class="wrap">
+
+    <div class="sheet-section prose">
+      <h2>Why I built it</h2>
+      <p>Stride rate is one of the most useful things a runner can know about their form, and one of the most annoying to measure well. Watches estimate it from wrist motion. Treadmill analysis puts you in a lab, on a belt, running in a way that isn't quite how you run outside. Filming yourself means someone else has to hold the camera, and they can't keep up.</p>
+      <p>I'm a Division I track athlete, so this is a problem I have personally. I wanted feedback from the way I actually run — outdoors, at real speed, over real distance — without needing a person to film it.</p>
+    </div>
+
+    <!-- IMAGE: replace this block with →  <img src="images/running-robot-01.jpg" alt="Runner tracked by the rover"> -->
+    <figure>
+      <div class="img-slot img-slot-wide"><span>images/running-robot-01.jpg</span></div>
+      <figcaption><b>Fig. 01</b> — Footage captured by the rover while tracking a runner.</figcaption>
+    </figure>
+
+    <div class="sheet-section prose">
+      <h2>How it works</h2>
+      <p>The platform is an old RC car, re-engineered to carry a GoPro on a mount stable enough that the footage is usable for analysis rather than just watchable. Starting from a salvaged chassis meant I could spend the effort on the tracking and analysis instead of on building a vehicle from scratch.</p>
+      <p>AI-powered motion capture software handles the tracking, keeping the runner framed as the rover follows them and processing the footage to extract stride events. From those it computes an average stride rate and reports it back in real time — the runner gets the number while they're still running, which is the only point at which they can do anything with it.</p>
+      <p>The interesting difficulty was that both the subject and the camera are moving. A tracking system that assumes a fixed vantage point doesn't survive being mounted on something that's accelerating, cornering, and hitting road irregularities.</p>
+    </div>
+
+    <!-- IMAGE: replace each block with →  <img src="images/running-robot-02.jpg" alt="..."> -->
+    <div class="fig-grid">
+      <figure>
+        <div class="img-slot"><span>images/running-robot-02.jpg</span></div>
+        <figcaption><b>Fig. 02</b> — The rover with the GoPro mount.</figcaption>
+      </figure>
+      <figure>
+        <div class="img-slot"><span>images/running-robot-03.jpg</span></div>
+        <figcaption><b>Fig. 03</b> — Motion capture tracking output.</figcaption>
+      </figure>
+    </div>
+
+    <div class="sheet-section prose">
+      <h2>What came of it</h2>
+      <p>It tracked runners successfully across varying speeds and distances and returned accurate stride rate measurements, which is enough to show the idea works: real-time coaching feedback from a follow camera, outdoors, without a person operating it.</p>
+      <p>This was the project where mechanical and software engineering stopped feeling like separate disciplines to me. The mount design determined whether the vision system had anything usable to work with, and the tracking behavior determined what the vehicle needed to do. Neither half could be designed without the other.</p>
+
+      <div class="outcomes">
+        <div class="outcome">
+          <p class="outcome-fig">SPM</p>
+          <p class="outcome-txt">Stride rate reported live, while the athlete is still running</p>
+        </div>
+        <div class="outcome">
+          <p class="outcome-fig">0</p>
+          <p class="outcome-txt">Camera operators needed — the rover follows on its own</p>
+        </div>
+        <div class="outcome">
+          <p class="outcome-fig">Outdoor</p>
+          <p class="outcome-txt">Tested across varying speeds and distances on road</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="wrap">
+    <nav class="sheet-nav">
+      <a class="nav-prev" href="vex-robot.html">
+        <p class="label">← Sheet 04</p>
+        <div class="nav-ttl">VEX Competition Robot</div>
+      </a>
+      <a class="nav-next" href="wind-up-toy.html">
+        <p class="label">Sheet 06 →</p>
+        <div class="nav-ttl">Wind-Up Toy Teardown</div>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <p class="label">Brady Golomb — Philadelphia, PA</p>
+    <div class="foot-links">
+      <a href="mailto:bradygolomb06@gmail.com">Email</a>
+      <a href="https://www.linkedin.com/in/bradygolomb">LinkedIn</a>
+      <a href="resume.pdf">Résumé</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
