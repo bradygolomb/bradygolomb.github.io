@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EMR with Patient Audio Briefings — Brady Golomb</title>
-<meta name="description" content="An electronic medical records system that converts physician SOAP notes into plain-language audio briefings for patients. Built at One Health Partners, 2026.">
+<title>Wound Care Discharge System — Brady Golomb</title>
+<meta name="description" content="An EMR feature that turns a patient's discharge chart into a plain-language audio briefing. Built at One Health Partners, 2026.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -31,8 +31,8 @@
       <span class="rule-fill"></span>
       <p class="label">One Health Partners · 2026</p>
     </div>
-    <h1 class="h-display sheet-title">EMR with Patient Audio Briefings</h1>
-    <p class="sheet-standfirst">A records system that turns a physician's clinical notes into a plain-language podcast the patient can listen to on the drive home.</p>
+    <h1 class="h-display sheet-title">Wound Care Discharge System</h1>
+    <p class="sheet-standfirst">One button in the EMR turns sixty days of clinical notes into a podcast the patient can actually understand — without asking anyone to write a word more.</p>
   </div>
   <div class="wrap">
     <div class="titleblock">
@@ -46,11 +46,11 @@
       </div>
       <div class="tb-cell">
         <p class="label">Built with</p>
-        <p class="tb-val">EMR architecture · AI summarization · Text-to-speech</p>
+        <p class="tb-val">Custom EMR · Structured LLM prompt assembly · NotebookLM audio generation</p>
       </div>
       <div class="tb-cell">
-        <p class="label">Duration</p>
-        <p class="tb-val">Summer 2026</p>
+        <p class="label">Built at</p>
+        <p class="tb-val">Internal hackathon<br>Solo build · August 2026</p>
       </div>
     </div>
   </div>
@@ -61,52 +61,58 @@
 
     <div class="sheet-section prose">
       <h2>The problem</h2>
-      <p>Patients forget most of what they're told in an appointment. They're anxious, the visit is short, and the information arrives in clinical vocabulary. What they leave with is usually a printed after-visit summary written in the same register as the chart it came from — which is to say, written for another clinician.</p>
-      <p>Meanwhile the actual account of what happened already exists, in detail, in the physician's SOAP notes and the clinical staff's patient notes. The information isn't missing. It's just stored in a form the patient can't use.</p>
+      <p>A patient leaves a skilled nursing facility after a two-month stay with a folder of paperwork and a vague sense of what happened to them. The record of their care is thorough — physician SOAP notes, weekly wound measurements, tissue assessments, the reasoning behind every protocol change — but all of it is written in clinical language, for clinicians.</p>
+      <p>The information they need in order to not end up back in a facility is already in that chart. It just isn't in a form they can use. And the standard fix — asking clinicians to write a second, patient-friendly summary — takes time directly out of patient care, so in practice it doesn't happen well or consistently.</p>
     </div>
 
-    <!-- IMAGE: replace this block with →  <img src="images/emr-01.jpg" alt="EMR interface"> -->
     <figure>
-      <div class="img-slot img-slot-wide"><span>images/emr-01.jpg</span></div>
-      <figcaption><b>Fig. 01</b> — The records interface where clinical notes are entered.</figcaption>
+      <img src="images/emr-01.png" alt="The EMR chart view showing a patient's wound care notes across a sixty-day stay">
+      <figcaption><b>Fig. 01</b> — The chart. Eighteen notes across a sixty-day stay, all of it already documented in the normal course of care.</figcaption>
     </figure>
 
     <div class="sheet-section prose">
-      <h2>The approach</h2>
-      <p>I built a new EMR system and added a layer on top of it that reads the physician's SOAP notes alongside the clinical staff's patient notes and generates an audio briefing from them. The patient gets a short podcast explaining, in ordinary language, what was found, what was done about it, and what they need to do during recovery.</p>
-      <p>Audio was a deliberate choice rather than a novelty. A printed summary competes for attention with everything else a patient is carrying out of an appointment, and reading it requires sitting down with it. A recording can be played in the car, replayed a week later when the instructions have blurred, or handed to the family member who's actually managing the recovery.</p>
-      <p>The design constraint that mattered most was tone. The output had to translate the clinical record without editorializing on it or inventing reassurance the notes didn't support — the goal was to make the existing record legible, not to generate new medical content.</p>
+      <h2>How it works</h2>
+      <p>I built this solo over an internal hackathon. The clinician's workflow doesn't change at all — physicians document as they always have: SOAP notes, wound assessments, and conversation notes entered into the EMR during the stay. Nothing new is asked of them.</p>
+      <p>At discharge, one button appears in the chart: <strong>Create discharge packet</strong>. Behind it, the system pulls six categories of source material out of the record — the SOAP notes, the patient and caregiver conversations, the wound measurements and tissue assessments over time, the treatment protocol matrix decisions, prevention guidance, and the discharge instructions — and assembles them into a single structured prompt through one LLM call. No multi-step agent, no tool loop; the complexity lives in how the chart is selected from and organized, not in the orchestration.</p>
+      <p>That prompt goes to NotebookLM, which generates the audio. The finished podcast returns into the EMR, where it sits as a draft attached to the patient's chart until a clinician reviews it and signs off. Keeping generation inside that loop is what lets the whole pipeline stay within the facility's compliance boundary rather than scattering patient information across external tools.</p>
+      <p>Once signed, it goes out two ways: emailed to the patient, and as a QR code printed in the physical discharge packet they're already walking out with.</p>
     </div>
 
-    <!-- IMAGE: replace each block with →  <img src="images/emr-02.jpg" alt="..."> -->
     <div class="fig-grid">
       <figure>
-        <div class="img-slot"><span>images/emr-02.jpg</span></div>
-        <figcaption><b>Fig. 02</b> — SOAP note input.</figcaption>
+        <img src="images/emr-02.png" alt="Source selection dialog listing the six chart sources the podcast is built from">
+        <figcaption><b>Fig. 02</b> — Six source types, every one already in the chart. Nothing is written specially for this.</figcaption>
       </figure>
       <figure>
-        <div class="img-slot"><span>images/emr-03.jpg</span></div>
-        <figcaption><b>Fig. 03</b> — Generated patient briefing, ready to play.</figcaption>
+        <img src="images/emr-03.png" alt="The generated patient podcast, chaptered and awaiting clinician sign-off">
+        <figcaption><b>Fig. 03</b> — The generated briefing, chaptered and held as a draft until a clinician signs it.</figcaption>
       </figure>
     </div>
 
     <div class="sheet-section prose">
-      <h2>The outcome</h2>
-      <p>The system produces a patient-facing explanation of care and post-discharge treatment automatically, from notes clinicians were already writing. There's no additional documentation burden — the physician's workflow doesn't change, and the translation happens downstream.</p>
-      <p>What I took from the project is that a lot of healthcare's communication problem isn't a data problem. The information a patient needs usually already exists somewhere in their record. The work is moving it across the gap between how clinicians write and how patients listen.</p>
+      <h2>What the patient hears</h2>
+      <p>The output is chaptered around the five questions a discharged patient actually has: what happened and what the wound was, how it healed week by week, what was done and why, how to keep it from coming back, and when to call for help.</p>
+      <p>Audio was a deliberate choice. A printed sheet competes with everything else a patient is carrying out the door, and reading it requires sitting down with it. A recording can be played in the car, replayed a week later when the instructions have blurred, or forwarded to the adult child who is actually managing the recovery.</p>
+      <p>The healing timeline is the part I think matters most. A patient who has spent sixty days being told a wound is "improving" has never seen what that means. Nine measurement sets narrated in sequence turn an abstraction into something they can follow.</p>
+    </div>
+
+    <div class="sheet-section prose">
+      <h2>A note on the patient in these screenshots</h2>
+      <p>Margaret "Peggy" Doyle does not exist. She is entirely synthetic — a fabricated chart built specifically for development and demonstration, with invented dates, measurements, labs, and notes. No real patient record was used at any point in building or showing this system, which is both a HIPAA requirement and the only responsible way to demo clinical software.</p>
+      <p>Building a convincing fake chart turned out to be real work in itself. The wound had to progress plausibly across nine assessments, the protocol changes had to follow from the tissue findings, and the labs had to be consistent with a 76-year-old recovering from hip fracture surgery. If the synthetic data isn't clinically coherent, the generated podcast isn't either, and you can't tell whether the system works.</p>
 
       <div class="outcomes">
         <div class="outcome">
           <p class="outcome-fig">0</p>
-          <p class="outcome-txt">Extra documentation required from physicians</p>
+          <p class="outcome-txt">Extra documentation asked of clinicians</p>
         </div>
         <div class="outcome">
-          <p class="outcome-fig">2</p>
-          <p class="outcome-txt">Note sources combined — physician SOAP and clinical staff notes</p>
+          <p class="outcome-fig">6</p>
+          <p class="outcome-txt">Chart sources combined into one patient briefing</p>
         </div>
         <div class="outcome">
-          <p class="outcome-fig">Audio</p>
-          <p class="outcome-txt">Replayable, shareable with family, usable while driving</p>
+          <p class="outcome-fig">1</p>
+          <p class="outcome-txt">Button, at the point in the workflow where discharge already happens</p>
         </div>
       </div>
     </div>
