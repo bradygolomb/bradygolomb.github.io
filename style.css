@@ -605,22 +605,27 @@ figcaption b {
 }
 
 .fig-portrait img {
-  max-width: 320px;
+  max-width: 240px;
   margin-left: auto;
   margin-right: auto;
   border: none;
   background: transparent;
 }
 
-.fig-portrait figcaption { text-align: center; }
+.fig-portrait figcaption {
+  text-align: center;
+  max-width: 240px;
+  margin-left: auto;
+  margin-right: auto;
+}
 
 @media (max-width: 780px) {
-  .fig-portrait img { max-width: 280px; }
+  .fig-portrait img { max-width: 220px; }
 }
 
 /* portrait placeholder, used before screenshots are added */
 .img-slot-portrait {
   aspect-ratio: 9 / 19.5;
-  max-width: 320px;
+  max-width: 240px;
   margin: 0 auto;
 }
