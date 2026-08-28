@@ -64,29 +64,28 @@
       <p>Disassemble a mechanical wind-up toy, analyze how it works, and reproduce it as a CAD assembly — preserving both the mechanism and the way the object actually looks. The constraint that makes this harder than it sounds is that appearance counts. A model that captures the gear train but loses the shape of the shell has only done half the job.</p>
     </div>
 
-    <!-- IMAGE: replace this block with →  <img src="images/wind-up-01.jpg" alt="The original wind-up toy"> -->
-    <figure>
-      <div class="img-slot img-slot-wide"><span>images/wind-up-01.jpg</span></div>
-      <figcaption><b>Fig. 01</b> — The original toy before disassembly.</figcaption>
-    </figure>
+    <div class="fig-grid">
+      <figure>
+        <img src="images/wind-up-01.png" alt="The original yellow wind-up duck toy before disassembly">
+        <figcaption><b>Fig. 01</b> — The original toy, before it came apart.</figcaption>
+      </figure>
+      <figure>
+        <img src="images/wind-up-03.png" alt="Rendered SolidWorks assembly of the duck with material appearances applied">
+        <figcaption><b>Fig. 03</b> — The finished assembly, rebuilt in SolidWorks.</figcaption>
+      </figure>
+    </div>
 
     <div class="sheet-section prose">
       <h2>The process</h2>
-      <p>I took the toy down to individual components and measured each one. Precision matters more here than in most modeling work, because the parts have to mate correctly at the end — a gear modeled a fraction of a millimeter off will either interfere or run with slop, and the error only shows up once everything is assembled.</p>
-      <p>Each part was modeled separately in SolidWorks, then brought together into an assembly. I verified fit and appearance before adding material appearances and rotation mates, so that the internal mechanism actually turns in the model the way it turns in the object.</p>
+      <p>I took the toy down to individual components and measured each one. Precision matters more here than in most modeling work, because the parts have to mate correctly at the end — a gear modeled a fraction of a millimetre off will either interfere or run with slop, and the error only shows up once everything is assembled.</p>
+      <p>Each part was modeled separately in SolidWorks and then brought together into an assembly. I checked fit and appearance before adding material appearances and rotation mates, so that the internal mechanism turns in the model the way it turns in the object.</p>
+      <p>The exploded view is the part that took the most care. It has to hold every component in a position that shows how the assembly goes together, which means the spacing is a design decision rather than an automatic output.</p>
     </div>
 
-    <!-- IMAGE: replace each block with →  <img src="images/wind-up-02.jpg" alt="..."> -->
-    <div class="fig-grid">
-      <figure>
-        <div class="img-slot"><span>images/wind-up-02.jpg</span></div>
-        <figcaption><b>Fig. 02</b> — Exploded view of the full component set.</figcaption>
-      </figure>
-      <figure>
-        <div class="img-slot"><span>images/wind-up-03.jpg</span></div>
-        <figcaption><b>Fig. 03</b> — Final rendered assembly with material appearances applied.</figcaption>
-      </figure>
-    </div>
+    <figure class="fig-tall">
+      <img src="images/wind-up-02.png" alt="Exploded view showing every internal component of the wind-up mechanism separated along its assembly axis">
+      <figcaption><b>Fig. 02</b> — Exploded view. Shell, gear train, spring drive, and flippers.</figcaption>
+    </figure>
 
     <div class="sheet-section prose">
       <h2>What it produced</h2>

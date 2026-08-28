@@ -65,35 +65,21 @@
       <p>I'm a Division I track athlete, so this is a problem I have personally. I wanted feedback from the way I actually run — outdoors, at real speed, over real distance — without needing a person to film it.</p>
     </div>
 
-    <!-- IMAGE: replace this block with →  <img src="images/running-robot-01.jpg" alt="Runner tracked by the rover"> -->
-    <figure>
-      <div class="img-slot img-slot-wide"><span>images/running-robot-01.jpg</span></div>
-      <figcaption><b>Fig. 01</b> — Footage captured by the rover while tracking a runner.</figcaption>
-    </figure>
+    <blockquote class="pull">
+      <p>Both the subject and the camera are moving. A tracking system that assumes a fixed vantage point does not survive being mounted on something that is accelerating, cornering, and hitting road irregularities.</p>
+    </blockquote>
 
     <div class="sheet-section prose">
       <h2>How it works</h2>
       <p>The platform is an old RC car, re-engineered to carry a GoPro on a mount stable enough that the footage is usable for analysis rather than just watchable. Starting from a salvaged chassis meant I could spend the effort on the tracking and analysis instead of on building a vehicle from scratch.</p>
       <p>AI-powered motion capture software handles the tracking, keeping the runner framed as the rover follows them and processing the footage to extract stride events. From those it computes an average stride rate and reports it back in real time — the runner gets the number while they're still running, which is the only point at which they can do anything with it.</p>
-      <p>The interesting difficulty was that both the subject and the camera are moving. A tracking system that assumes a fixed vantage point doesn't survive being mounted on something that's accelerating, cornering, and hitting road irregularities.</p>
-    </div>
-
-    <!-- IMAGE: replace each block with →  <img src="images/running-robot-02.jpg" alt="..."> -->
-    <div class="fig-grid">
-      <figure>
-        <div class="img-slot"><span>images/running-robot-02.jpg</span></div>
-        <figcaption><b>Fig. 02</b> — The rover with the GoPro mount.</figcaption>
-      </figure>
-      <figure>
-        <div class="img-slot"><span>images/running-robot-03.jpg</span></div>
-        <figcaption><b>Fig. 03</b> — Motion capture tracking output.</figcaption>
-      </figure>
+      <p>Getting a stable mount was most of the mechanical work. Footage that shakes is footage the vision system can't extract stride events from, so the bracket mattered as much as the tracking software did.</p>
     </div>
 
     <div class="sheet-section prose">
       <h2>What came of it</h2>
       <p>It tracked runners successfully across varying speeds and distances and returned accurate stride rate measurements, which is enough to show the idea works: real-time coaching feedback from a follow camera, outdoors, without a person operating it.</p>
-      <p>This was the project where mechanical and software engineering stopped feeling like separate disciplines to me. The mount design determined whether the vision system had anything usable to work with, and the tracking behavior determined what the vehicle needed to do. Neither half could be designed without the other.</p>
+      <p>I built this before I was documenting my work properly, so what survives is the result rather than the build — a lesson in itself. This was the project where mechanical and software engineering stopped feeling like separate disciplines to me. The mount design determined whether the vision system had anything usable to work with, and the tracking behavior determined what the vehicle needed to do. Neither half could be designed without the other.</p>
 
       <div class="outcomes">
         <div class="outcome">

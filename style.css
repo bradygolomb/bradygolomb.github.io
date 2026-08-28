@@ -629,3 +629,34 @@ figcaption b {
   max-width: 240px;
   margin: 0 auto;
 }
+
+/* tall non-phone images (part photos, in-situ shots) */
+.fig-tall img {
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.fig-tall figcaption {
+  text-align: center;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* pull quote — used where a page carries no imagery */
+.pull {
+  margin: clamp(40px, 6vw, 64px) 0;
+  padding: 0 0 0 clamp(20px, 4vw, 36px);
+  border-left: 2px solid var(--select);
+}
+
+.pull p {
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: clamp(1.25rem, 2.6vw, 1.75rem);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  max-width: 24ch;
+  margin: 0;
+}
