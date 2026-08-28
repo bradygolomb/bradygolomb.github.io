@@ -72,7 +72,7 @@
 
     <div class="sheet-section prose">
       <h2>How it works</h2>
-      <p>I built this solo over an internal hackathon. The clinician's workflow doesn't change at all — physicians document as they always have: SOAP notes, wound assessments, and conversation notes entered into the EMR during the stay. Nothing new is asked of them.</p>
+      <p>I built this EMR system to solve this issue. The clinician's workflow doesn't change at all — physicians document as they always have: SOAP notes, wound assessments, and conversation notes entered into the EMR during the stay. Nothing new is asked of them.</p>
       <p>At discharge, one button appears in the chart: <strong>Create discharge packet</strong>. Behind it, the system pulls six categories of source material out of the record — the SOAP notes, the patient and caregiver conversations, the wound measurements and tissue assessments over time, the treatment protocol matrix decisions, prevention guidance, and the discharge instructions — and assembles them into a single structured prompt through one LLM call. No multi-step agent, no tool loop; the complexity lives in how the chart is selected from and organized, not in the orchestration.</p>
       <p>That prompt goes to NotebookLM, which generates the audio. The finished podcast returns into the EMR, where it sits as a draft attached to the patient's chart until a clinician reviews it and signs off. Keeping generation inside that loop is what lets the whole pipeline stay within the facility's compliance boundary rather than scattering patient information across external tools.</p>
       <p>Once signed, it goes out two ways: emailed to the patient, and as a QR code printed in the physical discharge packet they're already walking out with.</p>
