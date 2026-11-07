@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rubber-Band Bungee Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a lab bench. Controls on the left, the drop shaft in the middle, instruments (readouts + accelerometer trace) on the right. */
+:root {
+  --paper: #f3f4f1;
+  --panel: #ffffff;
+  --ink: #1d2428;
+  --muted: #5d676d;
+  --rule: #d6dad6;
+  --rubber: #e0611c;
+  --string: #6f7a80;
+  --good: #2f8a4f;
+  --warn: #b7791f;
+  --bad: #c2362d;
+  --grid: #e7e9e5;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #15191b; --panel: #1d2326; --ink: #e8ebe8; --muted: #9aa4a8; --rule: #2f3739;
+    --rubber: #f07a35; --string: #8d989d; --good: #4fb06e; --warn: #d9a03f; --bad: #e5584e; --grid: #252c2f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #15191b; --panel: #1d2326; --ink: #e8ebe8; --muted: #9aa4a8; --rule: #2f3739;
+  --rubber: #f07a35; --string: #8d989d; --good: #4fb06e; --warn: #d9a03f; --bad: #e5584e; --grid: #252c2f;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.45; }
+header { padding: 20px 20px 8px; max-width: 1280px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline; justify-content: space-between; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: 28px; margin: 0; letter-spacing: 0.2px; text-wrap: balance; }
+.sub { color: var(--muted); margin: 2px 0 0; max-width: 62ch; }
+.credit { color: var(--muted); font-size: 13px; }
+main { max-width: 1280px; margin: 0 auto; padding: 12px 20px 28px; display: grid; grid-template-columns: 290px minmax(220px, 300px) 1fr; gap: 16px; align-items: start; }
+.card { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 14px; }
+h2 { font-family: var(--font-display); font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; margin: 0 0 10px; color: var(--muted); }
+.ctrl { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; margin-bottom: 10px; }
+.ctrl label { font-size: 13.5px; font-weight: 500; }
+.ctrl output { font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.ctrl input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--rubber); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+button, select { font: inherit; font-size: 13.5px; color: var(--ink); background: var(--paper); border: 1px solid var(--rule); border-radius: 7px; padding: 7px 11px; cursor: pointer; }
+button.primary { background: var(--rubber); border-color: var(--rubber); color: #fff; font-weight: 600; }
+button:hover { border-color: var(--muted); }
+button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid var(--rubber); outline-offset: 2px; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 13.5px; margin: 4px 0 10px; }
+details { border-top: 1px solid var(--rule); margin-top: 6px; padding-top: 8px; }
+summary { cursor: pointer; font-size: 13.5px; font-weight: 600; margin-bottom: 8px; }
+.selectrow { display: grid; gap: 4px; margin-bottom: 10px; font-size: 13.5px; font-weight: 500; }
+#shaftCard { padding: 8px; }
+#shaft { width: 100%; height: 640px; display: block; }
+.status { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.pill { font-size: 12.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; border: 1px solid; }
+.pill.good { color: var(--good); border-color: var(--good); }
+.pill.warn { color: var(--warn); border-color: var(--warn); }
+.pill.bad { color: var(--bad); border-color: var(--bad); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+.tile { border: 1px solid var(--rule); border-left: 4px solid var(--good); border-radius: 8px; padding: 8px 10px; }
+.tile.warn { border-left-color: var(--warn); }
+.tile.bad { border-left-color: var(--bad); }
+.tile .k { font-size: 12px; color: var(--muted); }
+.tile .v { font-family: var(--font-mono); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tile .s { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+#chart { width: 100%; height: 260px; display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+.sw { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-right: 5px; border-radius: 2px; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 5px 6px; border-bottom: 1px solid var(--rule); }
+th:first-child, td:first-child { text-align: left; }
+th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
+td.live { font-family: var(--font-mono); color: var(--rubber); font-weight: 600; }
+.note { font-size: 13px; color: var(--muted); margin: 8px 0 0; max-width: 70ch; }
+.how { max-width: 1280px; margin: 0 auto; padding: 0 20px 32px; }
+.how .card p { margin: 0 0 8px; max-width: 80ch; }
+.eq { font-family: var(--font-mono); font-size: 13.5px; background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 6px 10px; display: inline-block; margin: 2px 0 8px; }
+@media (max-width: 1020px) { main { grid-template-columns: 1fr 1fr; } #instruments { grid-column: 1 / -1; } }
+@media (max-width: 640px) { main { grid-template-columns: 1fr; } #shaft { height: 520px; } .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Rubber-Band Bungee Simulator</h1>
+    <p class="sub">Change the build, press Drop, and watch the jumper fall. The physics uses our measured rubber-band force law and reproduces our demo-day predictions.</p>
+  </div>
+  <div class="credit"><a href="bungee.html" style="color:inherit">← Back to the bungee project</a><br>Brady Golomb &amp; Zimu Yang · MEAM 3470, Penn · Fall 2026</div>
+</header>
+
+<main>
+  <!-- Controls -->
+  <section class="card" aria-label="Bungee build">
+    <h2>Build</h2>
+    <div class="row" style="margin-bottom:12px">
+      <button class="primary" id="dropBtn" type="button">Drop</button>
+      <button id="resetBtn" type="button">Reset</button>
+      <button id="demoBtn" type="button">Load demo-day build</button>
+    </div>
+    <div class="ctrl"><label for="H">Drop height (anchor to floor)</label><output id="Hout"></output><input id="H" type="range" min="5" max="20" step="0.1" value="14.3"></div>
+    <div class="ctrl"><label for="M">Jumper mass</label><output id="Mout"></output><input id="M" type="range" min="0.2" max="2" step="0.01" value="0.75"></div>
+    <div class="ctrl"><label for="Glim">Peak acceleration limit</label><output id="Glimout"></output><input id="Glim" type="range" min="2" max="8" step="0.1" value="5"></div>
+    <div class="ctrl"><label for="n">Bands in parallel</label><output id="nout"></output><input id="n" type="range" min="1" max="20" step="1" value="8"></div>
+    <div class="ctrl"><label for="m">Groups in series</label><output id="mout"></output><input id="m" type="range" min="1" max="40" step="1" value="22"></div>
+    <div class="ctrl"><label for="Ls">String length</label><output id="Lsout"></output><input id="Ls" type="range" min="0" max="10" step="0.01" value="4.34"></div>
+    <div class="row" style="margin-bottom:6px">
+      <button id="solveBtn" type="button">Set string for 85% fall</button>
+    </div>
+    <p class="note" style="margin-top:0">Our design rule: aim for 85% of the height, leaving margin above the 70% scoring minimum.</p>
+    <details>
+      <summary>Rubber model</summary>
+      <div class="selectrow"><label for="law">Band force law</label>
+        <select id="law">
+          <option value="mts">Our MTS cubic (fit to tensile tests)</option>
+          <option value="shared">Shared fit (Group 103-02, used for the design)</option>
+        </select>
+      </div>
+      <label class="check"><input id="knot" type="checkbox" checked> Knot correction (rubber inside each knot can't stretch)</label>
+      <div class="ctrl"><label for="scale">Band stiffness (±15% band-to-band spread)</label><output id="scaleout"></output><input id="scale" type="range" min="0.8" max="1.2" step="0.01" value="1"></div>
+      <div class="ctrl"><label for="loss">Energy lost per rebound (rubber hysteresis)</label><output id="lossout"></output><input id="loss" type="range" min="0" max="0.6" step="0.01" value="0.3"></div>
+      <div class="ctrl"><label for="off">Carabiner to bottom of jumper</label><output id="offout"></output><input id="off" type="range" min="0.05" max="0.5" step="0.01" value="0.22"></div>
+      <div class="ctrl"><label for="L">Tied length per band group</label><output id="Lout"></output><input id="L" type="range" min="50" max="95" step="1" value="76"></div>
+    </details>
+  </section>
+
+  <!-- Drop shaft -->
+  <section class="card" id="shaftCard" aria-label="Animated drop">
+    <canvas id="shaft" role="img" aria-label="Side view of the drop: anchor at top, cord, jumper and floor"></canvas>
+  </section>
+
+  <!-- Instruments -->
+  <section id="instruments" class="card" aria-label="Results">
+    <h2>Result</h2>
+    <div class="status" id="status"></div>
+    <div class="tiles" id="tiles"></div>
+    <h2>Accelerometer reading</h2>
+    <canvas id="chart" role="img" aria-label="Accelerometer reading in g versus time after release"></canvas>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--rubber)"></span>Simulated reading</span>
+      <span><span class="sw" style="background:var(--bad)"></span>g limit</span>
+      <span id="measLegend"><span class="sw" style="background:var(--ink)"></span>Measured on demo day (peak, free-fall end)</span>
+    </div>
+    <h2 style="margin-top:16px">Demo day check · 14.3 m, 0.75 kg, 22 × 8, 4.34 m string</h2>
+    <table>
+      <thead><tr><th>Quantity</th><th>Design model</th><th>MTS cubic + knots</th><th>Measured</th><th>This sim (current)</th></tr></thead>
+      <tbody>
+        <tr><td>Free-fall time</td><td>1.13 s</td><td>1.13 s</td><td>1.08 s</td><td class="live" id="cmpFree"></td></tr>
+        <tr><td>Peak acceleration</td><td>3.43 g</td><td>4.23 g</td><td>4.20 g</td><td class="live" id="cmpPeak"></td></tr>
+        <tr><td>Total fall</td><td>12.01 m</td><td>12.12 m</td><td>11.7 m</td><td class="live" id="cmpFall"></td></tr>
+        <tr><td>Floor clearance</td><td>2.29 m</td><td>2.18 m</td><td>2.6 m</td><td class="live" id="cmpClear"></td></tr>
+      </tbody>
+    </table>
+    <p class="note">The design model left out the knot correction and underpredicted the peak by 18%. With knots accounted for, the model lands within 1% of the measured 4.20 g.</p>
+  </section>
+</main>
+
+<section class="how" aria-label="How the simulation works">
+  <div class="card">
+    <h2>How it works</h2>
+    <p>The jumper is released with its bottom level with the anchor. It free-falls until the cord goes taut, after the carabiner offset, the string, and the slack rubber. Then the bands pull back. The simulation steps Newton's second law forward every 0.5 ms:</p>
+    <div class="eq">M·a = M·g − n·f(D / m<sub>eff</sub>)</div>
+    <p>Here D is the total rubber stretch, n is bands per group, and each band stretches D/m<sub>eff</sub>. Knots leave part of every band unable to stretch, so a knotted chain of m groups acts like m<sub>eff</sub> = 0.818·m groups. The per-band force f comes from MTS tensile tests (held-out validation R² = 0.978). The accelerometer reads the cord tension divided by the jumper's weight, about 0 g in free fall.</p>
+    <p class="note" style="margin:0">Not modeled: string stretch, wall contact, the jolt when the string snaps taut, and stretch-rate stiffening. Hysteresis only affects the rebounds, not the first (scored) drop. Fits are valid to 378 mm of stretch per band; the 8.3 N per-band cap comes from failure tests.</p>
+  </div>
+</section>
+
+<script>
+(() => {
+  const G = 9.80665;
+  const KNOT = 0.818, FORCE_CAP = 8.3, FIT_MAX = 0.378;
+  const DEMO = { H: 14.3, M: 0.75, Glim: 5, n: 8, m: 22, Ls: 4.34, off: 0.22, L: 76, law: 'mts', knot: true, scale: 1, loss: 0.3 };
+  const MEAS = { free: 1.08, peak: 4.20, peakT: 3.687 - 2.044, fall: 11.7 };
+
+  const laws = {
+    mts: q => { const d = q * 1000; return 0.021609 * d - 9.5112e-5 * d * d + 1.9956e-7 * d * d * d; },
+    shared: q => 187.57 * q * q * q - 102.96 * q * q + 26.088 * q
+  };
+
+  const $ = id => document.getElementById(id);
+  const ids = ['H','M','Glim','n','m','Ls','scale','loss','off','L'];
+  const fmt = {
+    H: v => v.toFixed(1) + ' m', M: v => v.toFixed(2) + ' kg', Glim: v => v.toFixed(1) + ' g',
+    n: v => v.toFixed(0), m: v => v.toFixed(0), Ls: v => v.toFixed(2) + ' m',
+    scale: v => '×' + v.toFixed(2), loss: v => Math.round(v * 100) + '%',
+    off: v => v.toFixed(2) + ' m', L: v => v.toFixed(0) + ' mm'
+  };
+
+  function params() {
+    const p = {};
+    ids.forEach(k => p[k] = parseFloat($(k).value));
+    p.L = p.L / 1000;
+    p.law = $('law').value; p.knot = $('knot').checked;
+    return p;
+  }
+
+  // Time-step simulation. Positive y = distance the jumper's bottom has fallen below the anchor.
+  function simulate(p, firstOnly) {
+    const f = laws[p.law];
+    const meff = p.knot ? KNOT * p.m : p.m;
+    const free = p.off + p.Ls + p.m * p.L;
+    const dt = 0.0005, tMax = firstOnly ? 6 : 10;
+    let y = 0, v = 0, t = 0, step = 0;
+    const out = { samples: [], free, hit: false, firstPeak: 0, firstPeakT: 0, freeT: null, maxY: 0, maxQ: 0, maxBand: 0, stretchT: 0 };
+    let inFirst = true, wasTaut = false;
+    while (t < tMax) {
+      const D = y - free;
+      let T = 0;
+      if (D > 0) {
+        const q = D / meff;
+        T = p.n * p.scale * f(q);
+        if (v < 0) T *= (1 - p.loss * Math.min(1, -v / 4));
+        if (inFirst) { out.maxQ = Math.max(out.maxQ, q); out.maxBand = Math.max(out.maxBand, T / p.n); }
+      }
+      const g = T / (p.M * G);
+      if (D > 0 && out.freeT === null) out.freeT = t;
+      if (inFirst && g > out.firstPeak) { out.firstPeak = g; out.firstPeakT = t; }
+      if (inFirst && g > 0.3) out.stretchT += dt;
+      if (step % 10 === 0) out.samples.push({ t, y, g, D });
+      if (D > 0) wasTaut = true;
+      if (wasTaut && D <= 0 && inFirst) { inFirst = false; if (firstOnly) break; }
+      const a = G - T / p.M;
+      v += a * dt; y += v * dt; t += dt; step++;
+      if (inFirst) out.maxY = Math.max(out.maxY, y);
+      if (y >= p.H) { out.hit = true; out.maxY = p.H; out.samples.push({ t, y: p.H, g, D: p.H - free }); break; }
+      if (firstOnly && wasTaut && v < 0) break;
+    }
+    out.tEnd = out.samples[out.samples.length - 1].t;
+    return out;
+  }
+
+  // Bisect the string length so the first lowest point lands at 85% of the height.
+  function solveString(p) {
+    const target = 0.85 * p.H;
+    let lo = 0, hi = p.H;
+    for (let i = 0; i < 40; i++) {
+      const mid = (lo + hi) / 2;
+      const r = simulate({ ...p, Ls: mid, loss: 0 }, true);
+      if (r.hit || r.maxY > target) hi = mid; else lo = mid;
+    }
+    return Math.max(0, Math.min(10, lo));
+  }
+
+  let sim = null, playing = false, playT = 0, lastFrame = 0, isDemo = true;
+
+  function isDemoBuild(p) {
+    return Math.abs(p.H - DEMO.H) < 1e-6 && Math.abs(p.M - DEMO.M) < 1e-6 && p.n === DEMO.n && p.m === DEMO.m &&
+      Math.abs(p.Ls - DEMO.Ls) < 1e-6 && Math.abs(p.off - DEMO.off) < 1e-6 && Math.round(p.L * 1000) === DEMO.L;
+  }
+
+  function recompute() {
+    ids.forEach(k => $(k + 'out').textContent = fmt[k](parseFloat($(k).value)));
+    const p = params();
+    sim = simulate(p, false);
+    sim.p = p;
+    isDemo = isDemoBuild(p);
+    $('measLegend').style.display = isDemo ? '' : 'none';
+    renderResults();
+    if (!playing) playT = sim.firstPeakT;
+    draw();
+  }
+
+  function pill(cls, text) { return `<span class="pill ${cls}">${text}</span>`; }
+
+  function renderResults() {
+    const p = sim.p;
+    const fall = sim.maxY, clear = p.H - fall, frac = fall / p.H;
+    const peakOK = sim.firstPeak <= p.Glim;
+    const pills = [];
+    if (sim.hit) pills.push(pill('bad', 'Hits the floor'));
+    else pills.push(pill('good', 'Stops above the floor'));
+    pills.push(peakOK ? pill('good', 'Under the g limit') : pill('bad', 'Over the g limit'));
+    if (!sim.hit && frac < 0.7) pills.push(pill('warn', 'Falls less than 70% of height'));
+    if (sim.maxBand > FORCE_CAP) pills.push(pill('bad', 'Bands may snap'));
+    if (sim.maxQ > FIT_MAX) pills.push(pill('warn', 'Stretch beyond tested range'));
+    $('status').innerHTML = pills.join('');
+
+    const tile = (cls, k, v, s) => `<div class="tile ${cls}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
+    $('tiles').innerHTML = [
+      tile(sim.hit ? 'bad' : frac < 0.7 ? 'warn' : '', 'Total fall', fall.toFixed(2) + ' m', (100 * frac).toFixed(1) + '% of height'),
+      tile(sim.hit ? 'bad' : clear < 0.5 ? 'warn' : '', 'Floor clearance', sim.hit ? '0.00 m' : clear.toFixed(2) + ' m', 'at the lowest point'),
+      tile(peakOK ? (sim.firstPeak > 0.9 * p.Glim ? 'warn' : '') : 'bad', 'Peak reading', sim.firstPeak.toFixed(2) + ' g', 'limit ' + p.Glim.toFixed(1) + ' g'),
+      tile('', 'Free-fall time', (sim.freeT ?? 0).toFixed(2) + ' s', 'before the cord catches'),
+      tile(sim.maxBand > FORCE_CAP ? 'bad' : sim.maxBand > 0.85 * FORCE_CAP ? 'warn' : '', 'Force per band', sim.maxBand.toFixed(2) + ' N', 'cap ' + FORCE_CAP.toFixed(1) + ' N'),
+      tile(sim.maxQ > FIT_MAX ? 'warn' : '', 'Stretch per band', (sim.maxQ * 1000).toFixed(0) + ' mm', 'tested to 378 mm')
+    ].join('');
+
+    $('cmpFree').textContent = (sim.freeT ?? 0).toFixed(2) + ' s';
+    $('cmpPeak').textContent = sim.firstPeak.toFixed(2) + ' g';
+    $('cmpFall').textContent = fall.toFixed(2) + ' m';
+    $('cmpClear').textContent = (sim.hit ? 0 : clear).toFixed(2) + ' m';
+  }
+
+  // ---------- drawing ----------
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  function fitCanvas(c) {
+    const r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    if (c.width !== Math.round(r.width * dpr) || c.height !== Math.round(r.height * dpr)) {
+      c.width = Math.round(r.width * dpr); c.height = Math.round(r.height * dpr);
+    }
+    const ctx = c.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx, w: r.width, h: r.height };
+  }
+
+  function sampleAt(t) {
+    const s = sim.samples; let lo = 0, hi = s.length - 1;
+    if (t >= s[hi].t) return s[hi];
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (s[mid].t <= t) lo = mid; else hi = mid; }
+    return s[lo];
+  }
+
+  function drawShaft() {
+    const { ctx, w, h } = fitCanvas($('shaft'));
+    const p = sim.p;
+    const top = 26, bottom = h - 22, scale = (bottom - top) / p.H;
+    const cx = w * 0.56;
+    const ink = css('--ink'), muted = css('--muted'), rule = css('--rule'), grid = css('--grid');
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = '11px "IBM Plex Mono", monospace'; ctx.textBaseline = 'middle';
+
+    // ruler
+    ctx.strokeStyle = rule; ctx.fillStyle = muted; ctx.lineWidth = 1;
+    const stepM = p.H > 12 ? 2 : 1;
+    for (let d = 0; d <= p.H + 1e-9; d += stepM) {
+      const y = top + d * scale;
+      ctx.beginPath(); ctx.moveTo(30, y); ctx.lineTo(38, y); ctx.stroke();
+      ctx.fillText(d.toFixed(0), 6, y);
+    }
+    ctx.beginPath(); ctx.moveTo(34, top); ctx.lineTo(34, bottom); ctx.stroke();
+    ctx.save(); ctx.translate(12, top - 14); ctx.fillText('m', 0, 0); ctx.restore();
+
+    // 70% and 85% lines
+    const line = (frac, label, color, dash) => {
+      const y = top + frac * p.H * scale;
+      ctx.strokeStyle = color; ctx.setLineDash(dash); ctx.beginPath(); ctx.moveTo(44, y); ctx.lineTo(w - 6, y); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = color; ctx.textAlign = 'right'; ctx.fillText(label, w - 8, y - 8); ctx.textAlign = 'left';
+    };
+    line(0.7, '70% minimum', muted, [3, 4]);
+    line(0.85, '85% target', muted, [8, 4]);
+
+    // beam + anchor
+    ctx.fillStyle = ink; ctx.fillRect(44, top - 8, w - 50, 5);
+    ctx.beginPath(); ctx.arc(cx, top, 3.5, 0, Math.PI * 2); ctx.fill();
+    // floor
+    ctx.fillStyle = grid; ctx.fillRect(44, bottom, w - 50, 14);
+    ctx.strokeStyle = ink; ctx.beginPath(); ctx.moveTo(44, bottom); ctx.lineTo(w - 6, bottom); ctx.stroke();
+    ctx.fillStyle = muted; ctx.fillText('floor', 48, bottom + 8);
+
+    // lowest point marker
+    if (!playing) {
+      const yl = top + sim.maxY * scale;
+      ctx.strokeStyle = css('--rubber'); ctx.setLineDash([2, 3]);
+      ctx.beginPath(); ctx.moveTo(cx - 34, yl); ctx.lineTo(cx + 34, yl); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = css('--rubber'); ctx.textAlign = 'right'; ctx.fillText('lowest ' + sim.maxY.toFixed(2) + ' m', cx - 38, yl); ctx.textAlign = 'left';
+    }
+
+    // current state
+    const s = sampleAt(playT);
+    const yBottom = top + s.y * scale;
+    const yCar = yBottom - p.off * scale;
+    const stringEnd = top + p.Ls * scale;
+    ctx.lineWidth = 1.6;
+    if (s.D > 0) {
+      // taut: string, then rubber zigzag
+      ctx.strokeStyle = css('--string');
+      ctx.beginPath(); ctx.moveTo(cx, top); ctx.lineTo(cx, stringEnd); ctx.stroke();
+      const len = yCar - stringEnd, zig = Math.max(6, Math.min(40, p.m));
+      ctx.strokeStyle = css('--rubber'); ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.moveTo(cx, stringEnd);
+      const amp = Math.max(1.5, 7 - 6 * (s.D / Math.max(0.01, p.m * p.L + s.D)));
+      for (let i = 1; i <= zig; i++) ctx.lineTo(cx + (i % 2 ? amp : -amp), stringEnd + len * (i - 0.5) / zig);
+      ctx.lineTo(cx, yCar); ctx.stroke();
+    } else {
+      // slack: cord hangs in a loop beside the jumper
+      const cordLen = (p.Ls + p.m * p.L) * scale;
+      const dropFromTop = Math.max(0, yCar - top);
+      const sag = Math.max(0, (cordLen - dropFromTop) / 2);
+      ctx.strokeStyle = css('--string'); ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(cx, top);
+      ctx.bezierCurveTo(cx - 22, top + sag + dropFromTop * 0.3, cx - 22, yCar + sag * 0.6, cx, yCar);
+      ctx.stroke();
+    }
+    // jumper
+    const jh = Math.max(16, p.off * scale), jw = 18;
+    ctx.fillStyle = ink;
+    ctx.beginPath(); ctx.roundRect(cx - jw / 2, yBottom - jh, jw, jh, 4); ctx.fill();
+    ctx.fillStyle = s.g > p.Glim ? css('--bad') : css('--rubber');
+    ctx.beginPath(); ctx.arc(cx, yBottom - jh / 2, 3.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = muted; ctx.textAlign = 'left';
+    ctx.fillText(s.g.toFixed(2) + ' g', cx + 16, yBottom - jh / 2);
+    ctx.fillText('t = ' + s.t.toFixed(2) + ' s', 48, top + 12);
+  }
+
+  function drawChart() {
+    const { ctx, w, h } = fitCanvas($('chart'));
+    const p = sim.p;
+    const L = 40, R = 10, T = 10, B = 28;
+    const tMax = Math.min(sim.tEnd, 6);
+    const gMax = Math.max(6, Math.ceil(Math.max(sim.firstPeak, p.Glim) + 1));
+    const X = t => L + (t / tMax) * (w - L - R), Y = g => T + (1 - g / gMax) * (h - T - B);
+    const muted = css('--muted'), grid = css('--grid'), ink = css('--ink');
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = '11px "IBM Plex Mono", monospace'; ctx.lineWidth = 1;
+    // grid
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (let g = 0; g <= gMax; g++) {
+      ctx.strokeStyle = grid; ctx.beginPath(); ctx.moveTo(L, Y(g)); ctx.lineTo(w - R, Y(g)); ctx.stroke();
+      if (g % (gMax > 8 ? 2 : 1) === 0) { ctx.fillStyle = muted; ctx.fillText(g + ' g', L - 6, Y(g)); }
+    }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let t = 0; t <= tMax + 1e-9; t += 1) { ctx.fillStyle = muted; ctx.fillText(t + ' s', X(t), h - B + 6); }
+    // free-fall shading
+    if (sim.freeT) { ctx.fillStyle = grid; ctx.globalAlpha = 0.6; ctx.fillRect(X(0), T, X(sim.freeT) - X(0), h - T - B); ctx.globalAlpha = 1;
+      ctx.fillStyle = muted; ctx.textAlign = 'left'; ctx.fillText('free fall', X(0) + 4, T + 2); }
+    // limit
+    ctx.strokeStyle = css('--bad'); ctx.setLineDash([6, 4]);
+    ctx.beginPath(); ctx.moveTo(L, Y(p.Glim)); ctx.lineTo(w - R, Y(p.Glim)); ctx.stroke(); ctx.setLineDash([]);
+    // trace (area + line), drawn up to the playhead
+    const upto = playing ? playT : sim.tEnd;
+    const pts = sim.samples.filter(s => s.t <= Math.min(upto, tMax));
+    if (pts.length > 1) {
+      const rub = css('--rubber');
+      ctx.beginPath(); ctx.moveTo(X(pts[0].t), Y(0));
+      pts.forEach(s => ctx.lineTo(X(s.t), Y(s.g)));
+      ctx.lineTo(X(pts[pts.length - 1].t), Y(0)); ctx.closePath();
+      ctx.fillStyle = rub; ctx.globalAlpha = 0.12; ctx.fill(); ctx.globalAlpha = 1;
+      ctx.beginPath(); pts.forEach((s, i) => i ? ctx.lineTo(X(s.t), Y(s.g)) : ctx.moveTo(X(s.t), Y(s.g)));
+      ctx.strokeStyle = rub; ctx.lineWidth = 2; ctx.stroke();
+      if (upto >= sim.firstPeakT && sim.firstPeakT <= tMax) {
+        ctx.fillStyle = rub; ctx.beginPath(); ctx.arc(X(sim.firstPeakT), Y(sim.firstPeak), 4, 0, Math.PI * 2); ctx.fill();
+        ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+        ctx.fillText('peak ' + sim.firstPeak.toFixed(2) + ' g', X(sim.firstPeakT) + 7, Y(sim.firstPeak) - 2);
+      }
+    }
+    // measured markers
+    if (isDemo) {
+      ctx.strokeStyle = ink; ctx.fillStyle = ink; ctx.lineWidth = 1.5;
+      const mx = X(MEAS.peakT), my = Y(MEAS.peak);
+      ctx.beginPath(); ctx.moveTo(mx - 5, my - 5); ctx.lineTo(mx + 5, my + 5); ctx.moveTo(mx + 5, my - 5); ctx.lineTo(mx - 5, my + 5); ctx.stroke();
+      ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; ctx.fillText('measured 4.20 g', mx - 8, my - 4);
+      ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.moveTo(X(MEAS.free), T); ctx.lineTo(X(MEAS.free), h - B); ctx.stroke(); ctx.setLineDash([]);
+    }
+    // playhead
+    if (playing) { ctx.strokeStyle = muted; ctx.beginPath(); ctx.moveTo(X(Math.min(playT, tMax)), T); ctx.lineTo(X(Math.min(playT, tMax)), h - B); ctx.stroke(); }
+  }
+
+  function draw() { drawShaft(); drawChart(); }
+
+  function frame(ts) {
+    if (!playing) return;
+    const dt = lastFrame ? (ts - lastFrame) / 1000 : 0; lastFrame = ts;
+    playT += dt;
+    if (playT >= sim.tEnd) { playT = sim.tEnd; playing = false; }
+    draw();
+    if (playing) requestAnimationFrame(frame);
+  }
+
+  function drop() {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { playT = sim.tEnd; draw(); return; }
+    playT = 0; lastFrame = 0; playing = true; requestAnimationFrame(frame);
+  }
+
+  function setValues(v) {
+    ['H','M','Glim','n','m','Ls','scale','loss','off','L'].forEach(k => $(k).value = v[k]);
+    $('law').value = v.law; $('knot').checked = v.knot;
+  }
+
+  ids.forEach(k => $(k).addEventListener('input', () => { playing = false; recompute(); }));
+  $('law').addEventListener('change', () => { playing = false; recompute(); });
+  $('knot').addEventListener('change', () => { playing = false; recompute(); });
+  $('dropBtn').addEventListener('click', drop);
+  $('resetBtn').addEventListener('click', () => { playing = false; playT = 0; draw(); });
+  $('demoBtn').addEventListener('click', () => { playing = false; setValues(DEMO); recompute(); drop(); });
+  $('solveBtn').addEventListener('click', () => { playing = false; $('Ls').value = solveString(params()).toFixed(2); recompute(); });
+  new ResizeObserver(() => draw()).observe(document.body);
+  if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+  new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  recompute();
+})();
+</script>
+</body>
+</html>

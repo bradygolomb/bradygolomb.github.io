@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rubber-Band Bungee Cord — Brady Golomb</title>
+<meta name="description" content="A 176-band bungee cord sized on demo day by a model built from tensile tests, checked against an instrumented 14.3 m drop. Fall predicted within 2.7%. Penn MEAM 3470, 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <a class="masthead-name" href="index.html">Brady Golomb</a>
+    <nav class="masthead-nav">
+      <a href="index.html#work">Work</a>
+      <a href="index.html#about">About</a>
+      <a href="resume.pdf">Résumé</a>
+      <a href="https://www.linkedin.com/in/bradygolomb">LinkedIn</a>
+    </nav>
+  </div>
+</header>
+
+<section class="sheet-head">
+  <div class="wrap">
+    <div class="sheet-eyebrow">
+      <p class="label">Sheet 02 of 07</p>
+      <span class="rule-fill"></span>
+      <p class="label">Penn Engineering · 2026</p>
+    </div>
+    <h1 class="h-display sheet-title">Rubber-Band Bungee Cord</h1>
+    <p class="sheet-standfirst">A bungee cord made of 176 rubber bands, sized on demo day by a model we built from tensile tests, then checked against an instrumented 14.3 m drop.</p>
+  </div>
+  <div class="wrap">
+    <div class="titleblock">
+      <div class="tb-cell">
+        <p class="label">Role</p>
+        <p class="tb-val">Testing, data logging, design model</p>
+      </div>
+      <div class="tb-cell">
+        <p class="label">Course</p>
+        <p class="tb-val">MEAM 3470, Penn (with Zimu Yang)</p>
+      </div>
+      <div class="tb-cell">
+        <p class="label">Built with</p>
+        <p class="tb-val">MTS tensile tests · Python · Arduino + LIS3DH accelerometer</p>
+      </div>
+      <div class="tb-cell">
+        <p class="label">Result</p>
+        <p class="tb-val">Fall predicted within 2.7%</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sheet-body">
+  <div class="wrap">
+
+    <div class="sheet-section prose">
+      <h2>The problem</h2>
+      <p>Design a rubber-band bungee cord that lets an instrumented jumper fall as far as possible without touching the floor or going over a peak acceleration limit. The catch: the drop height, the jumper's mass, and the g limit were only announced on demo day. So instead of designing one cord, we had to build a model that could design the right cord in a few minutes from any inputs.</p>
+      <p>On the day, the inputs were a 14.3 m drop, a 0.75 kg jumper, and a 5 g limit.</p>
+    </div>
+
+    <div class="sheet-section prose">
+      <h2>Characterizing the bands</h2>
+      <p>I ran our section's 18 tensile tests on the MTS machine: single bands, bands in series and in parallel, and several ways of joining them. A constant stiffness didn't fit, because the bands stiffen as they stretch, so we fit a cubic force law per band and scaled it for any number of bands in series and in parallel.</p>
+      <p>To check it honestly, we held another section's 14 tests out of the fit entirely. The model predicted them with R² = 0.978. Its error was smaller than the 10–13% variation between individual bands, which meant it was good enough to choose a design.</p>
+    </div>
+
+    <figure>
+      <img src="images/bungee-01.png" alt="Left: per-band force versus extension for five tensile tests with the cubic fit. Right: four held-out tests compared with the model's predictions.">
+      <figcaption><b>Fig. 01</b> — Left: per-band force from tensile tests, with the cubic fit. Right: tests held out of the fit, measured (points) against predicted (lines).</figcaption>
+    </figure>
+
+    <div class="sheet-section prose">
+      <h2>The design model</h2>
+      <p>The model treats the drop in two phases: free fall until the cord goes taut, then the bands stretching until they've stored all of the jumper's lost energy. It searches every combination of bands in parallel and groups in series, solves for the string length that lands the jumper at 85% of the height, and rejects any design that would exceed the g limit or overload a band.</p>
+      <p>Each surviving design is then re-run with bands 15% softer and 15% stiffer, about the spread between real bands. It's kept only if the soft case still misses the floor and the stiff case still falls at least 70% of the height. For demo day it chose 22 groups in series of 8 bands each, on a 4.44 m string.</p>
+    </div>
+
+    <div class="sheet-section prose">
+      <h2>Instrumenting the jumper</h2>
+      <p>I wrote an Arduino logger that records a LIS3DH accelerometer (±16 g) to an SD card at 200 Hz, more than 250 samples during the 1.4 s stretch. The jumper tumbles as it falls, so we used the magnitude of all three axes, which doesn't depend on orientation and equals the cord tension divided by the jumper's weight. Our Arduino broke on a misjudged test drop the day before the demo, so the final drop was logged on a borrowed board running the same kind of code.</p>
+    </div>
+
+    <figure>
+      <img src="images/bungee-02.png" alt="Left: full acceleration record of the final drop, showing 1.08 s of free fall and a 4.20 g peak under the 5 g limit. Right: the first cord stretch compared with two model predictions.">
+      <figcaption><b>Fig. 02</b> — Left: the full accelerometer record from demo day. Right: the first stretch against the original design model and the corrected model.</figcaption>
+    </figure>
+
+    <div class="sheet-section prose">
+      <h2>What the drop taught us</h2>
+      <p>The jumper fell 11.7 m, 81.8% of the height, stopped 2.6 m above the floor, and peaked at 4.20 g, under the 5 g limit. The model predicted the fall within 2.7%, but it underpredicted the peak by 18%.</p>
+      <p>The cause was the knots. The rubber inside each knot can't stretch, so a knotted chain of 22 groups behaves like about 18 free ones. With fewer groups sharing the stretch, each band stretches further into the steep part of its force curve, and the peak rises. We had measured this correction in the tensile tests but left it out of the design model. With it included, the model predicts 4.23 g, within 1% of the measurement, and matches the timing of the stretch.</p>
+    </div>
+
+    <div class="sheet-section prose">
+      <div class="outcomes">
+        <div class="outcome">
+          <p class="outcome-fig">2.7%</p>
+          <p class="outcome-txt">Fall prediction error on demo day (12.01 m predicted, 11.7 m measured)</p>
+        </div>
+        <div class="outcome">
+          <p class="outcome-fig">1%</p>
+          <p class="outcome-txt">Peak g error once the knot correction was included</p>
+        </div>
+        <div class="outcome">
+          <p class="outcome-fig">0.978</p>
+          <p class="outcome-txt">R² on tensile tests held out of the force fit</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet-section prose">
+      <h2>Try it and see the code</h2>
+      <p>The drop simulator runs the corrected model step by step. Change the build, drop the jumper, and compare it with the real demo-day drop. It reproduces our report's predictions to within 0.01 m and 0.01 g.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="bungee-sim.html">Open the drop simulator</a>
+        <a class="btn" href="https://drive.google.com/file/d/1TclA0OI_Aalo8R5qSiHqeD0SOk2AcnPL/view?usp=sharing">Watch the final drop</a>
+        <a class="btn" href="code/bungee_design_model.py">Design model (Python)</a>
+        <a class="btn" href="code/bungee_accel_logger.ino">Accelerometer logger (Arduino)</a>
+      </div>
+      <p style="margin-top:24px">Built with Zimu Yang. I ran the MTS tests, wrote the Arduino logger, and built the final design model. Zimu 3D-printed the jumper and developed the physics and first version of the model.</p>
+    </div>
+
+  </div>
+
+  <div class="wrap">
+    <nav class="sheet-nav">
+      <a class="nav-prev" href="bike-adapter.html">
+        <p class="label">← Sheet 01</p>
+        <div class="nav-ttl">Prosthetic Bike Adapter</div>
+      </a>
+      <a class="nav-next" href="vex-robot.html">
+        <p class="label">Sheet 03 →</p>
+        <div class="nav-ttl">VEX Competition Robot</div>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <p class="label">Brady Golomb — Philadelphia, PA</p>
+    <div class="foot-links">
+      <a href="mailto:bradyg@engineering.upenn.edu">Email</a>
+      <a href="https://www.linkedin.com/in/bradygolomb">LinkedIn</a>
+      <a href="resume.pdf">Résumé</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
