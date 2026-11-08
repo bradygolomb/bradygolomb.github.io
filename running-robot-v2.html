@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Running Form Robot v2 — Brady Golomb</title>
+<meta name="description" content="A ROS 2 (C++) and Gazebo rebuild of the Running Form Robot as a gait-analysis pipeline: a simulated leg with PID joint control and OpenCV pose tracking for stride rate and joint angles. In development.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <a class="masthead-name" href="index.html">Brady Golomb</a>
+    <nav class="masthead-nav">
+      <a href="index.html#work">Work</a>
+      <a href="index.html#about">About</a>
+      <a href="resume.pdf">Résumé</a>
+      <a href="https://www.linkedin.com/in/bradygolomb">LinkedIn</a>
+    </nav>
+  </div>
+</header>
+
+<section class="sheet-head">
+  <div class="wrap">
+    <div class="sheet-eyebrow">
+      <p class="label">Sheet 06 of 09</p>
+      <span class="rule-fill"></span>
+      <p class="label">Personal project · In development</p>
+    </div>
+    <h1 class="h-display sheet-title">Running Form Robot v2</h1>
+    <p class="sheet-standfirst">A rebuild of my Running Form Robot in ROS 2 and Gazebo, this time with my own gait-analysis code in place of off-the-shelf software.</p>
+    <div class="btn-row" style="margin-bottom:40px">
+      <a class="btn btn-primary" href="https://github.com/bradygolomb/running-form-robot-v2">View the code on GitHub →</a>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="titleblock">
+      <div class="tb-cell">
+        <p class="label">Role</p>
+        <p class="tb-val">Sole developer</p>
+      </div>
+      <div class="tb-cell">
+        <p class="label">Built with</p>
+        <p class="tb-val">ROS 2 Jazzy · C++ · Gazebo · OpenCV</p>
+      </div>
+      <div class="tb-cell">
+        <p class="label">Platform</p>
+        <p class="tb-val">Ubuntu 24.04 (WSL2)</p>
+      </div>
+      <div class="tb-cell">
+        <p class="label">Status</p>
+        <p class="tb-val">In development · Week 1 complete</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sheet-body">
+  <div class="wrap">
+
+    <div class="sheet-section prose">
+      <h2>Why a v2</h2>
+      <p>The <a href="running-robot.html">original Running Form Robot</a> worked: it followed a runner outdoors and reported stride rate in real time. But the gait analysis came from motion-capture software I integrated rather than wrote, so the most important part of the system was a black box. The hardware has since been retired, too.</p>
+      <p>v2 rebuilds the system in software, with every step written by me. Building it in simulation means the whole pipeline can be developed, tested, and shown without a rover or a runner, and each piece can be checked against a known answer before moving on.</p>
+    </div>
+
+    <div class="sheet-section prose">
+      <h2>The plan</h2>
+      <p>v2 is a gait-analysis pipeline built from ROS 2 nodes in C++, each handling one job and passing data to the next:</p>
+      <ul>
+        <li><b>Simulated leg.</b> A leg model (URDF) running in Gazebo, so there is a "runner" whose motion is known exactly.</li>
+        <li><b>Joint control.</b> PID control of the leg's joints through <code>ros2_control</code>, so the model can be driven through a realistic stride.</li>
+        <li><b>Pose tracking.</b> Computer vision (OpenCV) that measures stride rate and joint angles from running video, the job v1 handed to outside software.</li>
+        <li><b>Form feedback.</b> Comparing the measured gait to target ranges and reporting where it falls outside them.</li>
+      </ul>
+      <p>Because the simulated leg's true motion is known, the tracking can be checked directly: if the vision code reports a stride rate or knee angle, it can be compared to what the leg actually did.</p>
+    </div>
+
+    <div class="sheet-section prose">
+      <h2>What works now</h2>
+      <p>The ROS 2 Jazzy workspace is set up on Ubuntu 24.04, and the first C++ node is running. It publishes a simulated knee angle 50 times a second, swinging between 5° and 65° at 1.5 strides per second. Plotting it live in <code>rqt_plot</code> confirmed both the range and the stride frequency match the model. This node is the stand-in runner the rest of the pipeline will be built against.</p>
+    </div>
+
+    <div class="sheet-section prose">
+      <h2>Roadmap</h2>
+      <ul>
+        <li><b>Done:</b> ROS 2 and Gazebo environment setup</li>
+        <li><b>Done:</b> first C++ node, a simulated knee-angle publisher</li>
+        <li><b>Next:</b> leg model (URDF) running in Gazebo</li>
+        <li>PID joint control with <code>ros2_control</code></li>
+        <li>Pose tracking with OpenCV to measure stride rate and joint angles</li>
+        <li>Form feedback against target ranges</li>
+        <li>Demo video and full write-up on this page</li>
+      </ul>
+      <p>This project is in active development. Progress is tracked in the repository, and this page will be updated as each stage is finished.</p>
+      <div class="btn-row" style="margin-bottom:40px">
+        <a class="btn btn-primary" href="https://github.com/bradygolomb/running-form-robot-v2">View the code on GitHub</a>
+        <a class="btn" href="running-robot.html">See the original robot</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="wrap">
+    <nav class="sheet-nav">
+      <a class="nav-prev" href="running-robot.html">
+        <p class="label">← Sheet 05</p>
+        <div class="nav-ttl">Running Form Robot</div>
+      </a>
+      <a class="nav-next" href="wound-care-app.html">
+        <p class="label">Sheet 07 →</p>
+        <div class="nav-ttl">Delta Wound App</div>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <p class="label">Brady Golomb — Philadelphia, PA</p>
+    <div class="foot-links">
+      <a href="mailto:bradyg@engineering.upenn.edu">Email</a>
+      <a href="https://www.linkedin.com/in/bradygolomb">LinkedIn</a>
+      <a href="resume.pdf">Résumé</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

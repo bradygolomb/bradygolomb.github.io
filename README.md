@@ -1,6 +1,6 @@
 # Brady Golomb — portfolio site
 
-A home page, eight project pages, and two interactive simulators. Plain HTML, CSS, and JavaScript, with no build step and no frameworks. Open `index.html` in a browser to preview it locally.
+A home page, nine project pages, and two interactive simulators. Plain HTML, CSS, and JavaScript, with no build step and no frameworks. Open `index.html` in a browser to preview it locally.
 
 Live at **https://bradygolomb.github.io**
 
@@ -14,9 +14,10 @@ Live at **https://bradygolomb.github.io**
 | `rocket.html` | Sheet 03: Bottle Rocket Trajectory Model (MEAM 2480) |
 | `vex-robot.html` | Sheet 04: VEX Competition Robot (Carroll Robotics) |
 | `running-robot.html` | Sheet 05: Running Form Robot (personal project) |
-| `wound-care-app.html` | Sheet 06: Delta Wound App (One Health Partners) |
-| `emr-podcast.html` | Sheet 07: Wound Care Discharge System (One Health Partners) |
-| `wind-up-toy.html` | Sheet 08: Wind-Up Toy Teardown (Penn Engineering) |
+| `running-robot-v2.html` | Sheet 06: Running Form Robot v2 (in development, links to the GitHub repo) |
+| `wound-care-app.html` | Sheet 07: Delta Wound App (One Health Partners) |
+| `emr-podcast.html` | Sheet 08: Wound Care Discharge System (One Health Partners) |
+| `wind-up-toy.html` | Sheet 09: Wind-Up Toy Teardown (Penn Engineering) |
 | `bungee-sim.html` | Interactive bungee drop simulator, linked from `bungee.html` |
 | `rocket-sim.html` | Interactive rocket launch simulator, linked from `rocket.html` |
 | `bungee_design_model.py` | Bungee design model (Python, standard library only) |
@@ -39,6 +40,7 @@ Each page expects these files:
 | rocket | `images/rocket-01.jpg` `images/rocket-02.jpg` |
 | vex-robot | `images/vex-01.png` `images/vex-02.png` |
 | running-robot | none yet: this page needs photos |
+| running-robot-v2 | none yet: add Gazebo screenshots or an `rqt_plot` capture as the build progresses |
 | wound-care-app | `images/wound-app-01.png` `-02.png` `-03.png` |
 | emr-podcast | `images/emr-01.png` `-02.png` `-03.png` |
 | wind-up-toy | `images/wind-up-01.png` `-02.png` `-03.png` |
@@ -49,7 +51,7 @@ To add a photo, save it into `images/`, then copy an existing `<figure>` block o
 
 1. Copy an existing project page (for example `bungee.html`) and rename it.
 2. Edit the eyebrow (`Sheet NN of NN`), title, standfirst, title block, and sections.
-3. Add a row for it in the project index in `index.html`, and update the count (`08 projects`).
+3. Add a row for it in the project index in `index.html`, and update the count (`09 projects`).
 4. If the sheet total changes, update `Sheet NN of NN` on every page, and fix the previous/next links at the bottom of the pages on either side of the new one.
 
 ## Updating the site
