@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bottle Rocket Trajectory Model — Brady Golomb</title>
+<meta name="description" content="A 2 L bottle rocket and a calibrated flight model whose inverse solver chose the launch angle and butane charge to fly through a wall gap and land near a target on one attempt. Penn MEAM 2480, 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <a class="masthead-name" href="index.html">Brady Golomb</a>
+    <nav class="masthead-nav">
+      <a href="index.html#work">Work</a>
+      <a href="index.html#about">About</a>
+      <a href="resume.pdf">Résumé</a>
+      <a href="https://www.linkedin.com/in/bradygolomb">LinkedIn</a>
+    </nav>
+  </div>
+</header>
+
+<section class="sheet-head">
+  <div class="wrap">
+    <div class="sheet-eyebrow">
+      <p class="label">Sheet 03 of 08</p>
+      <span class="rule-fill"></span>
+      <p class="label">Penn Engineering · 2026</p>
+    </div>
+    <h1 class="h-display sheet-title">Bottle Rocket Trajectory Model</h1>
+    <p class="sheet-standfirst">A two-liter rocket and a flight model that chose its launch settings: through a gap in a wall 8 m away and down near a 22 m target, in one attempt.</p>
+  </div>
+  <div class="wrap">
+    <div class="titleblock">
+      <div class="tb-cell">
+        <p class="label">Role</p>
+        <p class="tb-val">Rocket design and build, flight model</p>
+      </div>
+      <div class="tb-cell">
+        <p class="label">Course</p>
+        <p class="tb-val">MEAM 2480, Penn · 3-person team</p>
+      </div>
+      <div class="tb-cell">
+        <p class="label">Built with</p>
+        <p class="tb-val">Python · NumPy / SciPy · 3D printing</p>
+      </div>
+      <div class="tb-cell">
+        <p class="label">Result</p>
+        <p class="tb-val">Cleared the gap on the only attempt</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sheet-body">
+  <div class="wrap">
+
+    <div class="sheet-section prose">
+      <h2>The problem</h2>
+      <p>The rocket is a 2 L bottle with water and a charge of liquid butane. The butane boils, pressurizes the bottle, and drives the water out the neck. On demo day we would be handed a wall distance, the height of a gap in that wall, and a target landing distance, and we would get one launch to send the rocket through the gap and onto the target.</p>
+      <p>We controlled four things: launch angle, water volume, water temperature, and butane charge. So, like the bungee, the job wasn't to build one perfect shot. It was to build a model that could pick the right shot in a few minutes from any inputs.</p>
+      <p>On the day, the wall was 8.15 m away, the gap was centered 6.4 m up, and the target was 22.0 m.</p>
+    </div>
+
+    <div class="sheet-section prose">
+      <h2>Building the rocket</h2>
+      <p>I designed and built the rocket around one requirement: it had to fly the same way every time, or no model could predict it. A party-hat nose cone kept the front sharp. After an early launch cracked the cone joint, I reinforced it with duct tape outside and four 3D-printed supports inside, which also moved mass toward the nose.</p>
+      <p>For the final lab I added a ring of screws at the cone joint, raising the dry mass from 146 g to 298 g. A heavier rocket is less sensitive to gusts and small drag differences, which mattered more than raw range for a single scored shot. Three double-layer cardboard fins, hot-glued and braced with twelve wooden blocks, kept the center of pressure behind the center of mass. The rocket flew straight on every launch.</p>
+    </div>
+
+    <figure>
+      <img src="images/rocket-01.jpg" alt="Annotated bottle rocket showing the party hat nose cone, ring of screws, cardboard fins with wooden support blocks, and the estimated center of mass ahead of the center of pressure">
+      <figcaption><b>Fig. 01</b> — The final rocket. Center of mass (red) sits ahead of center of pressure (blue) for stable flight.</figcaption>
+    </figure>
+
+    <div class="sheet-section prose">
+      <h2>The flight model</h2>
+      <p>The model splits each launch into two phases. In the thrust phase, the butane holds the bottle near its saturation pressure, set by water temperature through the Antoine equation. That pressure pushes water through the 21 mm neck, and the model tracks flow rate, thrust, drag, and the shrinking mass, stepping Newton's second law forward every millisecond. Once the water is gone, the ballistic phase is just gravity and quadratic drag until the rocket lands.</p>
+      <p>Physics alone doesn't capture a real launch: the seal leaks, not all the butane boils in time, and a taped bottle isn't a clean airfoil. So three coefficients were fit to launch data. Nozzle discharge (0.379) and drag (1.341) came from our first lab's launches, by minimizing the error between predicted and measured range. A butane-efficiency factor (0.497) came from six more launches where only the butane charge changed, from 3 g to 26 g.</p>
+    </div>
+
+    <figure>
+      <img src="images/rocket-02.jpg" alt="Inside of the nose cone with four 3D-printed support pieces taped in place">
+      <figcaption><b>Fig. 02</b> — Inside the nose cone: 3D-printed supports that stiffen the tip and move mass forward.</figcaption>
+    </figure>
+
+    <div class="sheet-section prose">
+      <h2>Solving for the shot</h2>
+      <p>The forward model answers "where will this launch land?" Demo day needed the reverse: "what launch lands here?" We fixed water at 500 mL and room temperature, the conditions we had calibrated at, and solved for the other two inputs. Angle mostly shapes the arc, and butane mostly sets the range.</p>
+      <p>The solver sweeps a 50 × 50 grid of angle and butane, runs the full flight model for each, and scores how far the rocket misses the gap height at the wall and the target on the ground. It then refines the best grid point with Nelder-Mead. For demo day it returned 52° and 11.9 g. We launched at 51° and 12 g.</p>
+    </div>
+
+    <div class="sheet-section prose">
+      <h2>What demo day showed</h2>
+      <p>The rocket went through the gap on the first and only attempt and landed at 23.99 m, 1.99 m past the 22.0 m target. That's a 9% miss on range, but the gap, the hard constraint, was cleared.</p>
+      <p>The model is most accurate near the conditions we used on demo day, around 12 g of butane. One efficiency factor can't cover the whole range: it under-predicts thrust at small charges and over-predicts at large ones. Butane was also the hardest input to load precisely, since going from 5 g to 8 g nearly doubled the range. A finer scale and a model of how efficiency changes with charge size would be the next steps.</p>
+    </div>
+
+    <div class="sheet-section prose">
+      <div class="outcomes">
+        <div class="outcome">
+          <p class="outcome-fig">1 / 1</p>
+          <p class="outcome-txt">Gap cleared on the only attempt (6.4 m up, 8.15 m out)</p>
+        </div>
+        <div class="outcome">
+          <p class="outcome-fig">1.99 m</p>
+          <p class="outcome-txt">Landing error against a 22.0 m target</p>
+        </div>
+        <div class="outcome">
+          <p class="outcome-fig">28</p>
+          <p class="outcome-txt">Test launches across two labs to build and check the model</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet-section prose">
+      <h2>Try it and see the code</h2>
+      <p>The simulator runs the same model and solver in your browser. Set a wall, a gap, and a target, and watch it pick the launch, or set the launch yourself. It reproduces our Python model's outputs to within 0.01 m.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="rocket-sim.html">Open the launch simulator</a>
+        <a class="btn" href="rocket_flight_model.py">Flight model and solver (Python)</a>
+      </div>
+      <p>Team: Brady Golomb, Chris Inglis, Hussein Elzaafarany.</p>
+    </div>
+
+  </div>
+
+  <div class="wrap">
+    <nav class="sheet-nav">
+      <a class="nav-prev" href="bungee.html">
+        <p class="label">← Sheet 02</p>
+        <div class="nav-ttl">Rubber-Band Bungee Cord</div>
+      </a>
+      <a class="nav-next" href="vex-robot.html">
+        <p class="label">Sheet 04 →</p>
+        <div class="nav-ttl">VEX Competition Robot</div>
+      </a>
+    </nav>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <p class="label">Brady Golomb — Philadelphia, PA</p>
+    <div class="foot-links">
+      <a href="mailto:bradyg@engineering.upenn.edu">Email</a>
+      <a href="https://www.linkedin.com/in/bradygolomb">LinkedIn</a>
+      <a href="resume.pdf">Résumé</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bottle Rocket Launch Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Same lab-bench look as the bungee simulator: controls on the left, the range in the middle, readouts below. */
+:root {
+  --paper: #f3f4f1; --panel: #ffffff; --ink: #1d2428; --muted: #5d676d; --rule: #d6dad6;
+  --accent: #e0611c; --path: #2b6cb0; --wall: #8a6a4a; --ground: #dfe3dc; --sky: #f7f9fb;
+  --good: #2f8a4f; --warn: #b7791f; --bad: #c2362d; --grid: #e7e9e5;
+  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #15191b; --panel: #1d2326; --ink: #e8ebe8; --muted: #9aa4a8; --rule: #2f3739;
+    --accent: #f07a35; --path: #6aa6e8; --wall: #a8835c; --ground: #2a3133; --sky: #192023;
+    --good: #4fb06e; --warn: #d9a03f; --bad: #e5584e; --grid: #252c2f; color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.45; }
+header { padding: 20px 20px 8px; max-width: 1280px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline; justify-content: space-between; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: 28px; margin: 0; }
+.sub { color: var(--muted); margin: 2px 0 0; max-width: 64ch; }
+.credit { color: var(--muted); font-size: 13px; }
+.credit a { color: inherit; }
+main { max-width: 1280px; margin: 0 auto; padding: 12px 20px 28px; display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start; }
+.card { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 14px; }
+h2 { font-family: var(--font-display); font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; margin: 0 0 10px; color: var(--muted); }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 14px; }
+.ctrl { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; margin-bottom: 10px; }
+.ctrl label { font-size: 13.5px; font-weight: 500; }
+.ctrl output { font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.ctrl input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--accent); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+button { font: inherit; font-size: 13.5px; color: var(--ink); background: var(--paper); border: 1px solid var(--rule); border-radius: 7px; padding: 7px 11px; cursor: pointer; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+button.on { border-color: var(--ink); font-weight: 600; }
+button:disabled { opacity: .6; cursor: wait; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.note { font-size: 13px; color: var(--muted); margin: 8px 0 0; max-width: 70ch; }
+#range { width: 100%; height: 400px; display: block; }
+.status { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.pill { font-size: 12.5px; font-weight: 600; padding: 3px 9px; border-radius: 999px; border: 1px solid; }
+.pill.good { color: var(--good); border-color: var(--good); } .pill.warn { color: var(--warn); border-color: var(--warn); } .pill.bad { color: var(--bad); border-color: var(--bad); }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+.tile { border: 1px solid var(--rule); border-left: 4px solid var(--good); border-radius: 8px; padding: 8px 10px; }
+.tile.warn { border-left-color: var(--warn); } .tile.bad { border-left-color: var(--bad); } .tile.plain { border-left-color: var(--rule); }
+.tile .k { font-size: 12px; color: var(--muted); }
+.tile .v { font-family: var(--font-mono); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tile .s { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 5px 6px; border-bottom: 1px solid var(--rule); }
+th:first-child, td:first-child { text-align: left; }
+th { font-weight: 600; color: var(--muted); font-size: 12.5px; }
+.how { max-width: 1280px; margin: 0 auto; padding: 0 20px 32px; }
+.how .card p { margin: 0 0 8px; max-width: 80ch; }
+.eq { font-family: var(--font-mono); font-size: 13.5px; background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 6px 10px; display: inline-block; margin: 2px 0 8px; }
+@media (max-width: 900px) { main { grid-template-columns: 1fr; } #range { height: 300px; } }
+@media (max-width: 560px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } #range { height: 240px; } }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Bottle Rocket Launch Simulator</h1>
+    <p class="sub">Set a wall, a gap, and a target, and the solver picks the launch angle and butane charge. Or set the launch yourself. This is our calibrated Python model, running in your browser.</p>
+  </div>
+  <div class="credit"><a href="rocket.html">← Back to the rocket project</a><br>Brady Golomb, Chris Inglis &amp; Hussein Elzaafarany · MEAM 2480, Penn · Spring 2026</div>
+</header>
+
+<main>
+  <section class="card" aria-label="Launch controls">
+    <div class="tabs">
+      <button class="on" id="tabSolve" type="button">Solve a shot</button>
+      <button id="tabManual" type="button">Manual launch</button>
+    </div>
+
+    <div id="solvePanel">
+      <h2>Course</h2>
+      <div class="ctrl"><label for="wall">Wall distance</label><output id="wallout"></output><input id="wall" type="range" min="2" max="12" step="0.05" value="8.15"></div>
+      <div class="ctrl"><label for="gap">Gap center height</label><output id="gapout"></output><input id="gap" type="range" min="1" max="7" step="0.05" value="6.4"></div>
+      <div class="ctrl"><label for="target">Target landing distance</label><output id="targetout"></output><input id="target" type="range" min="5" max="35" step="0.5" value="22"></div>
+      <div class="row">
+        <button class="primary" id="solveBtn" type="button">Solve &amp; launch</button>
+        <button id="demoBtn" type="button">Load demo day</button>
+      </div>
+      <p class="note">Gap width is 10% of the wall distance, at least 1 m. Water is fixed at 500 mL and room temperature, the conditions we calibrated at.</p>
+    </div>
+
+    <div id="manualPanel" hidden>
+      <h2>Launch</h2>
+      <div class="ctrl"><label for="angle">Launch angle</label><output id="angleout"></output><input id="angle" type="range" min="10" max="80" step="0.5" value="51"></div>
+      <div class="ctrl"><label for="butane">Butane charge</label><output id="butaneout"></output><input id="butane" type="range" min="9" max="25" step="0.5" value="12"></div>
+      <div class="ctrl"><label for="vol">Water volume</label><output id="volout"></output><input id="vol" type="range" min="250" max="1000" step="25" value="500"></div>
+      <div class="ctrl"><label for="temp">Water temperature</label><output id="tempout"></output><input id="temp" type="range" min="15" max="30" step="0.1" value="23.3"></div>
+      <div class="row"><button class="primary" id="launchBtn" type="button">Launch</button></div>
+      <p class="note">The wall and target stay where the Solve tab left them. Butane is limited to 9–25 g, where the calibration holds best.</p>
+    </div>
+  </section>
+
+  <section class="card" aria-label="Range and results">
+    <canvas id="range" role="img" aria-label="Side view of the launch: launcher, wall with gap, target flag, and the rocket's trajectory"></canvas>
+    <div class="status" id="status"></div>
+    <div class="tiles" id="tiles"></div>
+    <h2>Demo day check · 51°, 12 g, 500 mL, 23.3 °C</h2>
+    <table>
+      <thead><tr><th>Quantity</th><th>Model</th><th>Measured</th></tr></thead>
+      <tbody>
+        <tr><td>Through the gap (6.4 m center, 8.15 m out)</td><td>Yes, 6.28 m</td><td>Yes</td></tr>
+        <tr><td>Landing distance (target 22.0 m)</td><td>22.73 m</td><td>23.99 m</td></tr>
+      </tbody>
+    </table>
+    <p class="note">The solver's exact answer was 52.1° and 11.9 g; we rounded to settings we could set on the launcher and scale.</p>
+  </section>
+</main>
+
+<section class="how" aria-label="How the simulation works">
+  <div class="card">
+    <h2>How it works</h2>
+    <p>Liquid butane holds the bottle near its saturation pressure, set by water temperature through the Antoine equation. That pressure pushes water out the 21 mm neck. Every millisecond the model updates flow rate, thrust, drag, and the rocket's mass, then steps Newton's second law forward in x and y:</p>
+    <div class="eq">T = ṁ·vₑ + (p − pₐ)·Aₑ,   ṁ = C_d·Aₑ·√(2ρ_w·Δp)</div>
+    <p>When the water runs out, only gravity and quadratic drag act until landing. Three coefficients were fit to launch data: nozzle discharge C_d = 0.379, drag C_D = 1.341, and butane efficiency α = 0.497 (the share of the measured butane that acts as useful propellant).</p>
+    <p>To solve a shot, the model sweeps a 50 × 50 grid of angle and butane, scores each flight on how far it misses the gap height and the target, and refines the best point with Nelder-Mead.</p>
+    <p class="note" style="margin:0">Not modeled: wind, launch-seal variation, and how butane efficiency changes with charge size. The model is most accurate near 12 g; it under-predicts thrust at small charges and over-predicts at large ones.</p>
+  </div>
+</section>
+
+<script>
+// Port of Brady's MEAM 2480 Lab 4 rocket model (Python) to JavaScript.
+// Physics, constants, calibration values and solver logic mirror the notebook.
+const RocketModel = (() => {
+  const G = 9.81, RHO_AIR = 1.20, RHO_W = 1000.0, R_GAS = 8.314, M_BUT = 0.05812, P_ATM = 101325.0;
+  const V_BOTTLE = 2.0e-3, R_BOTTLE = 0.055, A_BODY = Math.PI * R_BOTTLE ** 2;
+  const VOL_ML = 500.0, T_WATER = 22.3, M_DRY = 0.298;
+  const D_NOZ = 0.0210, R_NOZ = D_NOZ / 2, A_NOZ = Math.PI * R_NOZ ** 2;
+  const CD_NOZ = 0.3792, CD_AERO = 1.3406;
+  const ALPHA = 0.49654; // calibrated from the six Lab 4 butane trials
+
+  const butaneSatPressure = (T_K) => {
+    const A = 4.35576, B = 1175.581, C = -2.071;
+    return Math.pow(10, A - B / (T_K + C)) * 1e5;
+  };
+  const saturatedGasMass = (p, V, T_K) => p * V * M_BUT / (R_GAS * T_K);
+
+  function simulate(angleDeg, mButane, volML = VOL_ML, TwaterC = T_WATER, opts = {}) {
+    const cdNoz = opts.cdNoz ?? CD_NOZ, cdAero = opts.cdAero ?? CD_AERO, mDry = opts.mDry ?? M_DRY;
+    const dt = opts.dt ?? 0.001, maxSteps = 1200000;
+    const theta = angleDeg * Math.PI / 180, T_K = TwaterC + 273.15, pSat = butaneSatPressure(T_K);
+    let mW = volML * 1e-6 * RHO_W;
+    let Vg = V_BOTTLE - mW / RHO_W;
+    const mgSat = saturatedGasMass(pSat, Vg, T_K);
+    let mg = Math.min(mButane, mgSat);
+    let mbLiq = Math.max(mButane - mg, 0);
+    let x = 0, y = 0, vx = 0, vy = 0, t = 0, maxY = 0, burnoutT = 0, burnoutV = 0;
+    let phase = "thrust";
+    const trajX = [0], trajY = [0], trajT = [0];
+
+    for (let step = 0; step < maxSteps; step++) {
+      t += dt;
+      let ax, ay;
+      if (phase === "thrust") {
+        Vg = Math.max(V_BOTTLE - mW / RHO_W, 1e-12);
+        if (mbLiq > 0) {
+          let dm = Math.max(saturatedGasMass(pSat, Vg, T_K) - mg, 0);
+          dm = Math.min(dm, mbLiq);
+          mg += dm; mbLiq -= dm;
+        }
+        const p = mg * R_GAS * T_K / (M_BUT * Vg);
+        if (p <= P_ATM || mW <= 1e-6) {
+          phase = "ballistic"; burnoutT = t; burnoutV = Math.hypot(vx, vy);
+          continue;
+        }
+        const dp = p - P_ATM;
+        const mdot = cdNoz * A_NOZ * Math.sqrt(2 * RHO_W * dp);
+        const ve = Math.sqrt(2 * dp / RHO_W);
+        const thrust = mdot * ve + dp * A_NOZ;
+        const mTot = mDry + mW + mg + mbLiq;
+        const v = Math.hypot(vx, vy);
+        let fdx = 0, fdy = 0;
+        if (v > 1e-9) { const Fd = 0.5 * RHO_AIR * cdAero * A_BODY * v * v; fdx = -Fd * vx / v; fdy = -Fd * vy / v; }
+        ax = (thrust * Math.cos(theta) + fdx) / mTot;
+        ay = (thrust * Math.sin(theta) + fdy) / mTot - G;
+        vx += ax * dt; vy += ay * dt; x += vx * dt; y += vy * dt;
+        mW = Math.max(mW - mdot * dt, 0);
+      } else {
+        const mTot = mDry + mg + mbLiq;
+        const v = Math.hypot(vx, vy);
+        let fdx = 0, fdy = 0;
+        if (v > 1e-9) { const Fd = 0.5 * RHO_AIR * cdAero * A_BODY * v * v; fdx = -Fd * vx / v; fdy = -Fd * vy / v; }
+        ax = fdx / mTot; ay = fdy / mTot - G;
+        vx += ax * dt; vy += ay * dt; x += vx * dt; y += vy * dt;
+      }
+      maxY = Math.max(maxY, y);
+      if (step % 10 === 0) { trajX.push(x); trajY.push(Math.max(y, 0)); trajT.push(t); }
+      if (y < 0 && phase === "ballistic" && t > 0.05) break;
+    }
+    trajX.push(Math.max(x, 0)); trajY.push(0); trajT.push(t);
+    return { range: Math.max(x, 0), tof: t, maxHeight: maxY, burnoutT, burnoutV, trajX, trajY, trajT };
+  }
+
+  function heightAtX(xs, ys, xq) {
+    if (xq <= xs[0]) return ys[0];
+    if (xq >= xs[xs.length - 1]) return ys[ys.length - 1];
+    for (let i = 1; i < xs.length; i++) {
+      if (xs[i] >= xq) {
+        const x0 = xs[i - 1], x1 = xs[i];
+        if (x1 === x0) return ys[i];
+        return ys[i - 1] + (ys[i] - ys[i - 1]) * (xq - x0) / (x1 - x0);
+      }
+    }
+    return ys[ys.length - 1];
+  }
+
+  // Nelder-Mead matching scipy defaults for 2 variables (adaptive coefficients equal standard ones for n=2).
+  function nelderMead(f, x0, { xatol = 0.02, fatol = 1e-7, maxiter = 2000 } = {}) {
+    const n = x0.length, rho = 1, chi = 2, psi = 0.5, sigma = 0.5;
+    let sim = [x0.slice()];
+    for (let k = 0; k < n; k++) { const y = x0.slice(); y[k] = y[k] !== 0 ? 1.05 * y[k] : 0.00025; sim.push(y); }
+    let fs = sim.map(f);
+    for (let it = 0; it < maxiter; it++) {
+      const ord = fs.map((v, i) => i).sort((a, b) => fs[a] - fs[b]);
+      sim = ord.map(i => sim[i]); fs = ord.map(i => fs[i]);
+      const xSpread = Math.max(...sim.slice(1).map(p => Math.max(...p.map((v, j) => Math.abs(v - sim[0][j])))));
+      const fSpread = Math.max(...fs.slice(1).map(v => Math.abs(v - fs[0])));
+      if (xSpread <= xatol && fSpread <= fatol) break;
+      const xbar = sim[0].map((_, j) => sim.slice(0, n).reduce((s, p) => s + p[j], 0) / n);
+      const xr = xbar.map((v, j) => (1 + rho) * v - rho * sim[n][j]); const fr = f(xr);
+      let shrink = false;
+      if (fr < fs[0]) {
+        const xe = xbar.map((v, j) => (1 + rho * chi) * v - rho * chi * sim[n][j]); const fe = f(xe);
+        if (fe < fr) { sim[n] = xe; fs[n] = fe; } else { sim[n] = xr; fs[n] = fr; }
+      } else if (fr < fs[n - 1]) { sim[n] = xr; fs[n] = fr; }
+      else if (fr < fs[n]) {
+        const xc = xbar.map((v, j) => (1 + psi * rho) * v - psi * rho * sim[n][j]); const fc = f(xc);
+        if (fc <= fr) { sim[n] = xc; fs[n] = fc; } else shrink = true;
+      } else {
+        const xcc = xbar.map((v, j) => (1 - psi) * v + psi * sim[n][j]); const fcc = f(xcc);
+        if (fcc < fs[n]) { sim[n] = xcc; fs[n] = fcc; } else shrink = true;
+      }
+      if (shrink) for (let i = 1; i <= n; i++) { sim[i] = sim[i].map((v, j) => sim[0][j] + sigma * (v - sim[0][j])); fs[i] = f(sim[i]); }
+    }
+    const best = fs.indexOf(Math.min(...fs));
+    return sim[best];
+  }
+
+  function solve(xHole, yHole, xFinal, { angleBounds = [10, 80], butaneBounds = [1, 50], volML = VOL_ML, TwaterC = T_WATER } = {}) {
+    const cost = ([angle, b]) => {
+      if (angle < angleBounds[0] || angle > angleBounds[1]) return 1e9;
+      if (b < butaneBounds[0] || b > butaneBounds[1]) return 1e9;
+      const r = simulate(angle, ALPHA * b * 1e-3, volML, TwaterC);
+      const h = heightAtX(r.trajX, r.trajY, xHole);
+      const re = (r.range - xFinal) / Math.max(xFinal, 1), he = (h - yHole) / Math.max(yHole, 0.25);
+      return re * re + he * he;
+    };
+    let best = [Infinity, 0, 0];
+    for (let i = 0; i < 50; i++) for (let j = 0; j < 50; j++) {
+      const a = angleBounds[0] + (angleBounds[1] - angleBounds[0]) * i / 49;
+      const b = butaneBounds[0] + (butaneBounds[1] - butaneBounds[0]) * j / 49;
+      const c = cost([a, b]); if (c < best[0]) best = [c, a, b];
+    }
+    let [angle, butane] = nelderMead(cost, [best[1], best[2]]);
+    angle = Math.min(Math.max(angle, angleBounds[0]), angleBounds[1]);
+    butane = Math.min(Math.max(butane, butaneBounds[0]), butaneBounds[1]);
+    const fin = simulate(angle, ALPHA * butane * 1e-3, volML, TwaterC);
+    return { angle, butane, cost: cost([angle, butane]), heightAtHole: heightAtX(fin.trajX, fin.trajY, xHole), ...fin };
+  }
+
+  return { simulate, solve, heightAtX, ALPHA, CD_NOZ, CD_AERO, M_DRY };
+})();
+
+
+</script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const DEMO = { wall: 8.15, gap: 6.4, target: 22, actual: 23.99 };
+  const fmt = { wall: v => v.toFixed(2) + ' m', gap: v => v.toFixed(2) + ' m', target: v => v.toFixed(1) + ' m',
+    angle: v => v.toFixed(1) + '°', butane: v => v.toFixed(1) + ' g', vol: v => v.toFixed(0) + ' mL', temp: v => v.toFixed(1) + ' °C' };
+  Object.keys(fmt).forEach(k => { const upd = () => $(k + 'out').textContent = fmt[k](parseFloat($(k).value)); $(k).addEventListener('input', upd); upd(); });
+
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const course = () => ({ wall: +$('wall').value, gap: +$('gap').value, target: +$('target').value });
+  const gapWidth = w => Math.max(0.1 * w, 1.0);
+  const isDemo = c => Math.abs(c.wall - DEMO.wall) < 1e-6 && Math.abs(c.gap - DEMO.gap) < 1e-6 && Math.abs(c.target - DEMO.target) < 1e-6;
+  let flight = null, shown = null, anim = 0;
+
+  function fit(c) {
+    const r = c.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+    c.width = Math.round(r.width * d); c.height = Math.round(r.height * d);
+    const ctx = c.getContext('2d'); ctx.setTransform(d, 0, 0, d, 0, 0); return { ctx, w: r.width, h: r.height };
+  }
+
+  function draw(upto) {
+    const { ctx, w, h } = fit($('range')), c = course(), f = shown;
+    const xmax = Math.max(c.target + 4, c.wall + 4, f ? f.full.range + 2 : 0, 12);
+    const ymax = Math.max(c.gap + gapWidth(c.wall), f ? f.full.maxHeight : 0, 6) * 1.15;
+    const L = 40, R = 12, T = 12, B = 30;
+    const k = Math.min((w - L - R) / xmax, (h - T - B) / ymax);
+    const X = x => L + x * k, Y = y => h - B - y * k;
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = css('--sky'); ctx.fillRect(0, 0, w, h);
+    ctx.font = '11px "IBM Plex Mono", monospace'; ctx.lineWidth = 1;
+    const step = xmax > 25 ? 5 : 2;
+    ctx.strokeStyle = css('--grid'); ctx.fillStyle = css('--muted');
+    for (let x = 0; x <= xmax; x += step) { ctx.beginPath(); ctx.moveTo(X(x), Y(0)); ctx.lineTo(X(x), T); ctx.stroke(); }
+    for (let y = 2; y <= ymax; y += 2) { ctx.beginPath(); ctx.moveTo(X(0), Y(y)); ctx.lineTo(w - R, Y(y)); ctx.stroke(); ctx.fillText(y + ' m', 4, Y(y) + 4); }
+    ctx.fillStyle = css('--ground'); ctx.fillRect(0, Y(0), w, h - Y(0));
+    ctx.strokeStyle = css('--ink'); ctx.beginPath(); ctx.moveTo(0, Y(0)); ctx.lineTo(w, Y(0)); ctx.stroke();
+    ctx.fillStyle = css('--muted'); for (let x = 0; x <= xmax; x += step) ctx.fillText(x + ' m', X(x) - 8, h - 10);
+    // wall with gap
+    const gw = gapWidth(c.wall), wx = X(c.wall) - 4;
+    ctx.fillStyle = css('--wall');
+    ctx.fillRect(wx, Y(c.gap - gw / 2), 8, Y(0) - Y(c.gap - gw / 2));
+    ctx.fillRect(wx, T, 8, Y(c.gap + gw / 2) - T);
+    ctx.strokeStyle = css('--accent'); ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(wx - 8, Y(c.gap)); ctx.lineTo(wx + 16, Y(c.gap)); ctx.stroke(); ctx.setLineDash([]);
+    // target flag
+    ctx.strokeStyle = css('--ink'); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(X(c.target), Y(0)); ctx.lineTo(X(c.target), Y(0) - 26); ctx.stroke();
+    ctx.fillStyle = css('--accent'); ctx.beginPath(); ctx.moveTo(X(c.target), Y(0) - 26); ctx.lineTo(X(c.target) + 14, Y(0) - 21); ctx.lineTo(X(c.target), Y(0) - 16); ctx.fill();
+    if (isDemo(c)) {
+      ctx.fillStyle = css('--ink'); ctx.beginPath(); ctx.arc(X(DEMO.actual), Y(0), 4.5, 0, 7); ctx.fill();
+      ctx.fillText('measured', X(DEMO.actual) + 8, Y(0) - 14); ctx.fillText('23.99 m', X(DEMO.actual) + 8, Y(0) - 3);
+    }
+    ctx.fillStyle = css('--ink'); ctx.fillRect(X(0) - 3, Y(0) - 3, 10, 6);
+    if (!f) return;
+    const n = upto ?? f.trajX.length - 1;
+    ctx.strokeStyle = css('--path'); ctx.lineWidth = 2.5; ctx.beginPath();
+    for (let i = 0; i <= n; i++) { const px = X(f.trajX[i]), py = Y(f.trajY[i]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+    ctx.stroke();
+    const i = Math.max(1, n), dx = f.trajX[i] - f.trajX[i - 1], dy = f.trajY[i] - f.trajY[i - 1];
+    ctx.save(); ctx.translate(X(f.trajX[n]), Y(f.trajY[n])); ctx.rotate(-Math.atan2(dy, dx || 1e-9));
+    ctx.fillStyle = css('--accent'); ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(2, -4); ctx.lineTo(-9, -4); ctx.lineTo(-9, 4); ctx.lineTo(2, 4); ctx.closePath(); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = css('--muted'); ctx.fillText('t = ' + f.trajT[n].toFixed(2) + ' s', L + 6, T + 12);
+  }
+
+  function play(f) {
+    cancelAnimationFrame(anim); shown = f;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { draw(); return; }
+    const t0 = performance.now(), tEnd = f.trajT[f.trajT.length - 1];
+    const tick = now => {
+      const t = Math.min((now - t0) / 1000, tEnd);
+      let n = f.trajT.findIndex(v => v >= t); if (n < 0) n = f.trajT.length - 1;
+      draw(n); if (t < tEnd) anim = requestAnimationFrame(tick);
+    };
+    anim = requestAnimationFrame(tick);
+  }
+
+  // Stop the drawn flight at the wall if it misses the gap.
+  function withWall(r) {
+    const c = course(), h = RocketModel.heightAtX(r.trajX, r.trajY, c.wall);
+    const ok = r.range >= c.wall && Math.abs(h - c.gap) <= gapWidth(c.wall) / 2;
+    let f = { ...r, full: r };
+    if (!ok && r.range >= c.wall) {
+      const cut = r.trajX.findIndex(x => x >= c.wall);
+      f = { ...r, full: r, trajX: r.trajX.slice(0, cut + 1), trajY: r.trajY.slice(0, cut + 1), trajT: r.trajT.slice(0, cut + 1) };
+    }
+    return { f, h, ok };
+  }
+
+  const pill = (cls, t) => `<span class="pill ${cls}">${t}</span>`;
+  const tile = (cls, k, v, s) => `<div class="tile ${cls}"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`;
+
+  function report(r, extra) {
+    const c = course(), { f, h, ok } = withWall(r), miss = r.range - c.target;
+    const near = Math.abs(miss) <= 0.1 * c.target;
+    $('status').innerHTML = [ok ? pill('good', 'Through the gap') : pill('bad', 'Hits the wall'),
+      ok ? (near ? pill('good', 'Within 10% of target') : pill('warn', 'Off target by more than 10%')) : '', extra || ''].join('');
+    $('tiles').innerHTML = [
+      ...(r.angle !== undefined ? [tile('plain', 'Launch angle', r.angle.toFixed(1) + '°', 'chosen by solver'), tile('plain', 'Butane to load', r.butane.toFixed(1) + ' g', 'measured charge')] : []),
+      tile(ok ? '' : 'bad', 'Height at wall', h.toFixed(2) + ' m', 'gap ' + (c.gap - gapWidth(c.wall) / 2).toFixed(2) + '–' + (c.gap + gapWidth(c.wall) / 2).toFixed(2) + ' m'),
+      tile(ok ? (near ? '' : 'warn') : 'plain', ok ? 'Landing distance' : 'Range with no wall', r.range.toFixed(2) + ' m', (miss >= 0 ? '+' : '') + miss.toFixed(2) + ' m vs target'),
+      tile('plain', 'Max height', r.maxHeight.toFixed(2) + ' m', 'apex of the arc'),
+      tile('plain', 'Flight time', r.tof.toFixed(2) + ' s', 'launch to landing'),
+      ...(r.angle === undefined ? [tile('plain', 'Burnout speed', r.burnoutV.toFixed(1) + ' m/s', 'when the water runs out')] : [])
+    ].join('');
+    play(f);
+  }
+
+  function solve() {
+    const b = $('solveBtn'); b.disabled = true; b.textContent = 'Solving…';
+    setTimeout(() => {
+      const c = course(), r = RocketModel.solve(c.wall, c.gap, c.target);
+      b.disabled = false; b.innerHTML = 'Solve &amp; launch';
+      $('angle').value = r.angle.toFixed(1); $('butane').value = Math.min(Math.max(r.butane, 9), 25).toFixed(1);
+      ['angle', 'butane'].forEach(k => $(k).dispatchEvent(new Event('input')));
+      report(r, r.cost > 0.01 ? pill('warn', 'Shot is at the edge of what the rocket can do') : '');
+    }, 30);
+  }
+
+  function launch() {
+    report(RocketModel.simulate(+$('angle').value, RocketModel.ALPHA * $('butane').value * 1e-3, +$('vol').value, +$('temp').value));
+  }
+
+  function setTab(solveTab) {
+    $('tabSolve').classList.toggle('on', solveTab); $('tabManual').classList.toggle('on', !solveTab);
+    $('solvePanel').hidden = !solveTab; $('manualPanel').hidden = solveTab;
+  }
+  $('tabSolve').addEventListener('click', () => setTab(true));
+  $('tabManual').addEventListener('click', () => setTab(false));
+  $('solveBtn').addEventListener('click', solve);
+  $('launchBtn').addEventListener('click', launch);
+  $('demoBtn').addEventListener('click', () => { $('wall').value = DEMO.wall; $('gap').value = DEMO.gap; $('target').value = DEMO.target;
+    ['wall', 'gap', 'target'].forEach(k => $(k).dispatchEvent(new Event('input'))); solve(); });
+  ['wall', 'gap', 'target'].forEach(k => $(k).addEventListener('input', () => { cancelAnimationFrame(anim); draw(); }));
+  new ResizeObserver(() => draw()).observe(document.body);
+  if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => draw());
+  solve();
+})();
+</script>
+</body>
+</html>
